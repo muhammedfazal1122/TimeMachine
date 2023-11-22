@@ -1,22 +1,31 @@
 from django.shortcuts import render
 from django.shortcuts import render,redirect,HttpResponse,get_object_or_404
 from django.http import JsonResponse
-from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
-from django.views.decorators.cache import cache_control
-from django.contrib.auth.decorators import login_required
 from accounts.models import Account
 from .models import AdressBook
-import re
+from datetime import datetime  # Make sure to import datetime from the correct module
 from product.models import Product
 # Create your views here.
+from django.shortcuts import render, redirect,get_object_or_404
+from django.http import JsonResponse
+import datetime
+from django.contrib import messages
+from django.conf import settings
+from datetime import date, datetime
+import datetime
+from order.models import Order
+from user.models import AdressBook
+from django.contrib import messages
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 
 
 def edit_profile(request):
     if not request.user.is_authenticated:
         return redirect('account:index')
-    
+
     user_profile = Account.objects.get(email=request.user.email) # Get the UserProfile instance for the logged-in user
 
     if request.method == 'POST':
@@ -153,3 +162,102 @@ def get_names(request):
         'status': True,
         'payload': payload
      })
+
+
+
+
+
+def admn_sales_report(request):
+    start_date = request.GET.get('start_date', None)
+    end_date = request.GET.get('end_date', None)
+    status_filter = int(request.GET.get('status_filter', 0))
+    current_date = timezone.now().strftime("%Y-%m-%d")
+    orders = []
+    print(start_date,end_date,status_filter)
+
+
+    if  is_valid_date(start_date) and is_valid_date(end_date) and status_filter ==  0:
+    
+        orders = Order.objects.all().order_by("-created_at")
+        
+    elif( not is_valid_date(start_date) )  and ( not is_valid_date(end_date)) and (status_filter ==  0):
+        orders = filter_order_by_date( request,start_date, end_date)
+    else:
+
+        orders = filter_order_by_date_and_status( start_date, end_date, status_filter)
+
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'status_filter': status_filter,
+        'orders': orders,
+        'current_date': current_date,
+
+    }
+    print(start_date,end_date,status_filter)
+    return render(request, "evara-backend/sales-report.html", context)
+
+
+
+def filter_order_by_date( request, start_date_str, end_date_str):
+    start_date = convert_string_to_date(start_date_str)
+    end_date = convert_string_to_date(end_date_str)
+
+    if start_date > end_date:
+        messages.warning(request, 'Start Date Must Be Less Than End Date')
+        return Order.objects.all().order_by("-created_at")
+    elif start_date == end_date:
+        return Order.objects.filter(created_at__date=start_date).order_by("-created_at")
+    else:
+        return Order.objects.filter(created_at__date__range=(start_date, end_date)).order_by("-created_at")
+
+def filter_order_by_date_and_status( start_date_str, end_date_str, status_filter):
+    if not start_date_str or start_date_str == 'null' or not end_date_str or end_date_str == 'null':
+        return filter_order_by_status(status_filter)
+
+    start_date = convert_string_to_date(start_date_str)
+    end_date = convert_string_to_date(end_date_str)
+
+    if start_date == end_date:
+        
+        status = get_order_status_by_value(status_filter)
+        return Order.objects.filter(created_at__date=start_date, status=status).order_by("-created_at") 
+    else:
+        status = get_order_status_by_value(status_filter)
+        return Order.objects.filter(created_at__date__range=(start_date, end_date), status=status).order_by("-created_at") 
+
+def filter_order_by_status(status_filter):
+    status = get_order_status_by_value(status_filter)
+
+    return Order.objects.filter(status=status).order_by("-created_at") 
+
+def get_order_status_by_value(status_filter):
+    # Implement your logic to map status_filter values to actual order statuses
+    # Example: 
+    if status_filter == 1:                    
+        return "Pending"
+    elif status_filter == 2:
+        return "Shipped"
+    elif status_filter == 3:
+        return "Deliverd"
+    elif status_filter == 4:
+        return "Cancelled"
+    elif status_filter == 5:
+        return "Returned"
+    # Add more mappings as needed
+
+def convert_string_to_date(date_str):
+    if not date_str or date_str == 'null':
+        return date.today()
+    return datetime.strptime(date_str, '%Y-%m-%d').date()
+
+
+def is_valid_date(date_str):
+    if not date_str or date_str == 'null':
+        return True
+    try:
+        # Use the full module path for strptime
+        datetime.strptime(date_str, '%Y-%m-%d')
+        return False
+    except ValueError:
+        return True

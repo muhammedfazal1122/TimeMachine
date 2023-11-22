@@ -32,7 +32,9 @@ def product_details(request, id):
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def admn_product_list(request):
     products = Product.objects.all()
+    
     context = {
+
 
         'products':products
 

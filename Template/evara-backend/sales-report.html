@@ -35,19 +35,20 @@
 <header class="card-header">
     <div class="row gx-3 d-flex justify-content-between" >
         <div class="col-lg-3 col-6 col-md-3">
-                <form action="{% url 'orders:admn_sales_report' %}" method="get" class="d-flex flex-row">
+                <form action="{% url 'user:admn_sales_report' %}" method="get" class="d-flex flex-row">
+                    <input type="number" name="status_filter" value="{{status_filter}}" hidden="hidden">
                 <div class="d-flex flex-row justify-content-between">
                     <div class="d-flex flex-column">
 
                     <label for="start">Start date:</label>
 
-                    <input type="date" id="start" name="startDate" value="{{ start_date | default:'2022-01-01' }}"/>
-                    </div>
+                    <input type="date" id="start" name="start_date" value="{% if start_date %}{{ start_date }}{% else %}2023-11-20{% endif %}" />
+                </div>
                     <div class="d-flex flex-column">
 
                     <label for="end">End date:</label>
-                    <input type="date" id="end" name="endDate" value="{{ end_date }}"  />
-                    </div>
+                    <input type="date" id="end" name="end_date" value="{% if end_date %}{{ end_date }}{% else %}{{ current_date }}{% endif %}" />
+                </div>
                     <div class="d-flex flex-column justify-content-end align-items-center  " >
 
                     <button type="submit" class="form-control "style="height:34px; ">
@@ -63,13 +64,16 @@
     
         <div class="col-lg-3 col-6 col-md-3">
             <form method="get" class="d-flex flex-row">
-                <select class="form-select border border-dark" name="StatusFilter">
-                    <option value="0" {% if StatusFilter == 0 %}selected{% endif %}>All Status</option>
-                    <option value="1" {% if StatusFilter == 1 %}selected{% endif %}>Pending</option>
-                    <option value="2" {% if StatusFilter == 2 %}selected{% endif %}>Shipped</option>
-                    <option value="3" {% if StatusFilter == 3 %}selected{% endif %}>Delivered</option>
-                    <option value="4" {% if StatusFilter == 4 %}selected{% endif %}>Cancel</option>
-                    <option value="5" {% if StatusFilter == 5 %}selected{% endif %}>Returned</option>
+                <input type="date" id="start" name="start_date" value="{% if start_date %}{{ start_date }}{% else %}2023-11-20{% endif %}" hidden="hidden" />
+                <input type="date" id="end" name="end_date" value="{% if end_date %}{{ end_date }}{% else %}{{ current_date }}{% endif %}" hidden="hidden"/>
+
+                <select class="form-select border border-dark" name="status_filter">
+                    <option value="0" {% if status_filter == 0 %}selected{% endif %}>All Status</option>
+                    <option value="1" {% if status_filter == 1 %}selected{% endif %}>Pending</option>
+                    <option value="2" {% if status_filter == 2 %}selected{% endif %}>Shipped</option>
+                    <option value="3" {% if status_filter == 3 %}selected{% endif %}>Delivered</option>
+                    <option value="4" {% if status_filter == 4 %}selected{% endif %}>Cancel</option>
+                    <option value="5" {% if status_filter == 5 %}selected{% endif %}>Returned</option>
                 </select>
                 <button type="submit" class="border border-dark border-left-0 px-3">
                     <i class="material-icons md-published_with_changes"></i>

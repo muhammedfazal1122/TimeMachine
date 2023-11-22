@@ -85,7 +85,7 @@
 
 
                     <li class="menu-item {% if current_url_name == 'admn_sales_report' %} active {% endif %}">
-                        <a class="menu-link" href="{% url 'orders:admn_sales_report' %}"> <i class="icon material-icons md-pie_chart"></i>
+                        <a class="menu-link" href="{% url 'user:admn_sales_report' %}"> <i class="icon material-icons md-pie_chart"></i>
                             <span class="text">Sales Report</span>
                         </a>
                         
@@ -155,10 +155,10 @@
         <header class="main-header navbar">
             <div class="col-search">
                 <form class="searchform">
-                    <div class="input-group">
+                    {% comment %} <div class="input-group">
                         <input list="search_terms" type="text" class="form-control" placeholder="Search term">
                         <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
-                    </div>
+                    </div> {% endcomment %}
                     <datalist id="search_terms">
                         <option value="Products">
                         <option value="New orders">
@@ -192,15 +192,25 @@
                         </div>
                     </li>
                     <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="{% static 'assets-back/imgs/people/avatar2.jpg' %}" alt="User"></a>
-                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                            <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
-                            <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Account Settings</a>
-                            <a class="dropdown-item" href="#"><i class="material-icons md-account_balance_wallet"></i>Wallet</a>
-                            <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a>
-                            <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>Help center</a>
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false">
+                            <img class="img-xs rounded-circle" src="{% static "assets/assets-back/imgs/people/avatar1.jpg" %}" alt="User" style="width: 40px; height: 40px;">
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount" >
+                            {% if user.is_authenticated %}
+                            <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>{{user.username}}</a>
+                            <a class="dropdown-item" href="#"><i class="material-icons md-help_outline"></i>{{user.email}}</a>
+                            {% endif %} 
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item text-danger" href="{% url "accounts:admin_logout" %}"><i class="material-icons md-exit_to_app"></i>Logout</a>
+
+
+
+                            <a class="dropdown-item" href="{% url "user:edit_profile" %}"><i class="material-icons md-perm_identity"></i>Edit Profile</a>
+                            {% comment %} <a class="dropdown-item" href="{% url "user:manage_address" %}"><i class="material-icons md-settings"></i>Manage Address</a> {% endcomment %}
+                            {% comment %} <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a> {% endcomment %}
+                            {% comment %} <a class="dropdown-item" href="{% url "orders:my_orders" %}"><i class="material-icons md-help_outline"></i>My Orders</a>  {% endcomment %}
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="{% url 'accounts:user-logout' %}"><i class="material-icons md-exit_to_app"></i>Logout</a>
+                           
                         </div>
                     </li>
                 </ul>

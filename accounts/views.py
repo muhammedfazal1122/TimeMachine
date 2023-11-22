@@ -68,6 +68,7 @@ User = get_user_model()  # Get the User model defined in your project
 
 def sent_otp(request):
    random_num=random.randint(1000,9999)
+   print("OOTTTPPP::",random_num)
    request.session['OTP_Key']=str(random_num)
    send_mail(
    "OTP AUTHENTICATING TimeMachine",
@@ -189,6 +190,7 @@ def admin_login(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 @login_required(login_url='accounts:admin_login')  # Use the named URL pattern
 def admin_dashboard(request):
+
     return render(request,'evara-backend/index.html')
 
 

@@ -66,7 +66,7 @@
                                     <td width="40%">
                                         <a href="#" class="itemside">
                                             <div class="left">
-                                                <img src="{% static 'assets-back/imgs/people/avatar1.jpg' %}" class="img-sm img-avatar" alt="Userpic">
+                                                {% comment %} <img src="{% static 'assets-back/imgs/people/avatar1.jpg' %}" class="img-sm img-avatar" alt="Userpic"> {% endcomment %}
                                             </div>
                                             <div class="info pl-3">
                                                 <h6 class="mb-0 title">{{user.username}}</h6>
@@ -101,18 +101,7 @@
                     </div>
                 </div> <!-- card-body end// -->
             </div> <!-- card end// -->
-            <div class="pagination-area mt-15 mb-50">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-start">
-                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                        <li class="page-item"><a class="page-link" href="#">03</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">16</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-                    </ul>
-                </nav>
-            </div>
+            
         </section> <!-- content-main end// -->
         {% endblock content %}
 

@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
-from datetime import datetime
+from datetime import date, datetime
 import datetime
 from cart.models import CartItem
 from .forms import OrderForm
@@ -289,73 +289,3 @@ def admn_product_order(request):
 
     return render(request,"evara-backend/page-orders-detail.html",context)
 
-
-def admn_sales_report(request):
-    startDate = request.GET.get('startDate', None)
-    endDate = request.GET.get('endDate', None)
-    statusFilter = int(request.GET.get('StatusFilter', 0))
-
-    if startDate and endDate and statusFilter == 0:
-        orders = Order.objects.all().order_by('-created_at')
-    elif statusFilter == 0:
-        orders = Order.objects.filter(created_at__gte=startDate, created_at__lte=endDate).order_by('-created_at')
-    # else:
-    #     orders = Order.objects.filter(created_at__gte=startDate, created_at__lte=endDate, status=statusFilter).order_by('-created_at')
-
-
-    context = {
-        'StartDate': startDate,
-        'EndDate': endDate,
-        'StatusFilter': statusFilter,
-        # 'OrderMainList': orders,
-    }
-    # order_products = OrderProduct.objects.filter(order__in=orders)
-    context = {
-        'orders': orders,
-        # "order_products":order_products,
-    }
-
-    return render(request,"evara-backend/sales-report.html",context)
-
-
-def get_weekly_sales():
-    end_date = timezone.now()
-    start_date = end_date - timezone.timedelta(days=7)
-
-    return OrderProduct.objects.filter(
-        order__created_at__range=(start_date, end_date)
-    ).values('product__product_name').annotate(weekly_sales=Sum('quantity'))
-
-
-
-def get_monthly_sales():
-    end_date = timezone.now()
-    start_date = end_date - timezone.timedelta(days=30)
-
-    return OrderProduct.objects.filter(
-        order__created_at__range=(start_date, end_date)
-    ).values('product__product_name').annotate(monthly_sales=Sum('quantity'))
-
-
-
-def get_yearly_sales():
-    end_date = timezone.now()
-    start_date = end_date - timezone.timedelta(days=365)
-
-
-    return OrderProduct.objects.filter(
-        order__created_at__range=(start_date, end_date)
-    ).values('product__product_name').annotate(yearly_sales=Sum('quantity'))
-
-
-
-def sales_report(request):
-    weekly_sales_data = list(get_weekly_sales().values('product__product_name','weekly_sales'))  # Convert QuerySet to a list of dictionaries
-    monthly_sales_data = list(get_monthly_sales().values('product__product_name','monthly_sales'))
-    yearly_sales_data = list(get_yearly_sales().values('product__product_name','yearly_sales'))
-    sales_data = {
-        'weekly_sales': weekly_sales_data,
-        'monthly_sales': monthly_sales_data,
-        'yearly_sales': yearly_sales_data,
-    }
-    return JsonResponse(sales_data, safe=False)
