@@ -465,7 +465,7 @@
                         <a class="categori-button-active-2" href="#">
                             <span class="fi-rs-apps"></span> Browse Categories
                         </a>
-                        <div class="categori-dropdown-wrap categori-dropdown-active-small">
+                        <!-- <div class="categori-dropdown-wrap categori-dropdown-active-small">
                             <ul>
                                 <li><a href="shop-grid-right.html"><i class="evara-font-dress"></i>Women's Clothing</a></li>
                                 <li><a href="shop-grid-right.html"><i class="evara-font-tshirt"></i>Men's Clothing</a></li>
@@ -477,9 +477,9 @@
                                 <li><a href="shop-grid-right.html"><i class="evara-font-teddy-bear"></i>Mother & Kids</a></li>
                                 <li><a href="shop-grid-right.html"><i class="evara-font-kite"></i>Outdoor fun</a></li>
                             </ul>
-                        </div>
+                        </div> -->
                     </div>
-                    <!-- mobile menu start -->
+                    <!-- mobile menu start
                     <nav>
                         <ul class="mobile-menu">
                             <li class="menu-item-has-children"><span class="menu-expand"></span><a href="index.html">Home</a>
@@ -575,7 +575,7 @@
                                 </ul>
                             </li>
                         </ul>
-                    </nav>
+                    </nav> -->
                     <!-- mobile menu end -->
                 </div>
                 <div class="mobile-header-info-wrap mobile-header-border">
@@ -775,8 +775,8 @@
                                     <div class="product-img-action-wrap">
                                         <div class="product-img product-img-zoom">
                                             <a href= "{% url 'product:product_details' product.id %}">
-                                                <img class="default-img" src="{{product.images.url}}" style="width:300px; height:220px; ">
-                                                <img class="hover-img" src="{{product.images.url}}" alt="" style="width:300px; height:220px; ">
+                                                <img class="default-img" src="{{product.images.url}}" >
+                                                <img class="hover-img" src="{{product.images.url}}" >
                                             </a>
                                         </div>
                                         <div class="product-action-1">
@@ -804,7 +804,7 @@
                                             <span class="old-price">${{product.max_price}}</span>
                                         </div>
                                         <div class="product-action-1 show">
-                                            <a aria-label="Add To Cart" class="action-btn hover-up"  href="{% url "cart:add_cart" product.id %}" ><i class="fi-rs-shopping-bag-add"></i></a>
+                                            <button id="product_id" aria-label="Add To Cart" class="action-btn hover-up" onclick="add_to_cart_icon({{ product.id }})" ><i class="fi-rs-shopping-bag-add"></i></button>
                                         </div>
                                     </div>
                                 </div> 
@@ -1564,6 +1564,8 @@
 		 
 	</script>
 
+
+
    
 </body>
 
@@ -1571,24 +1573,3 @@
 <!-- Mirrored from wp.alithemes.com/html/evara/evara-frontend/index.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:25:49 GMT -->
 </html>
 
-
-
-
-                        {% comment %} <div class="brand-logo">
-                            <img class="img-grey-hover" href="" src="{% static 'assets/imgs/banner/hublot1.png'%}" alt="">
-                        </div>
-                        <div class="brand-logo">
-                            <img class="img-grey-hover" src="{% static 'assets/imgs/banner/rado1.png'%}" alt="">
-                        </div>
-                        <div class="brand-logo">
-                            <img class="img-grey-hover" src="{% static 'assets/imgs/banner/casio1.png'%}" alt="">
-                        </div>
-                        <div class="brand-logo">
-                            <img class="img-grey-hover" src="{% static 'assets/imgs/banner/titan3.png'%}" alt="">
-                        </div>
-                        <div class="brand-logo">
-                            <img class="img-grey-hover" src="{% static 'assets/imgs/banner/rolex2.png'%}" alt="">
-                        </div>
-                        <div class="brand-logo">
-                            <img class="img-grey-hover" src="{% static 'assets/imgs/banner/fossil3.png'%}" alt="">
-                        </div> {% endcomment %}

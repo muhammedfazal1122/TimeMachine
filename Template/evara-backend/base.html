@@ -27,7 +27,7 @@
     <div class="screen-overlay"></div>
     <aside class="navbar-aside" id="offcanvas_aside">
         <div class="aside-top">
-            <a href="index.html" class="brand-wrap">
+            <a href="{% url 'accounts:admin_dashboard' %}" class="brand-wrap">
                 <img src="{% static 'assets-back/imgs/theme/logo2.png' %}" class="logo" alt="Evara Dashboard">
             </a>
             <div>
@@ -48,7 +48,7 @@
                         </a>
                     </li>
                     <li class="menu-item{% if current_url_name == 'admn_product_category' %} active {% endif %}">
-                        <a class="menu-link" href="{% url 'category:admn_product_category' %}"> <i class="icon material-icons md-local_offer"></i>
+                        <a class="menu-link" href="{% url 'category:admn_product_category' %}"> <i class="icon material-icons md-add_box"></i>
                             <span class="text">Categories</span>
                         </a>
                     </li>
@@ -76,12 +76,7 @@
                             <a href="page-seller-detail.html">User profile</a>
                         </div> {% endcomment %}
                     </li>
-                    <li class="menu-item {% if current_url_name == 'admn_add_product' %} active {% endif %}">
-                        <a class="menu-link" href="{% url 'product:admn_add_product' %}"> <i class="icon material-icons md-add_box"></i>
-                            <span class="text">Add product</span>
-                        </a>
-                        
-                    </li>
+                 
 
 
                     <li class="menu-item {% if current_url_name == 'admn_sales_report' %} active {% endif %}">
@@ -120,6 +115,12 @@
                         <a class="menu-link" href="{% url 'brand:admn_brand_list' %}">
                             <i class="icon material-icons md-stars"></i>
                             <span class="text">Brands</span>
+                        </a>
+                    </li>
+                    <li class="menu-item{% if current_url_name == 'admn_coupon_management' %} active {% endif %}">
+                        <a class="menu-link" href="{% url 'orders:admn_coupon_management' %}">
+                            <i class="icon material-icons md-local_offer"></i>
+                            <span class="text">Coupon</span>
                         </a>
                     </li>
                                         {% comment %} <li class="menu-item">
@@ -171,10 +172,10 @@
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
                 <ul class="nav">
                     <li class="nav-item">
-                        <a class="nav-link btn-icon" href="#">
+                        {% comment %} <a class="nav-link btn-icon" href="#">
                             <i class="material-icons md-notifications animation-shake"></i>
                             <span class="badge rounded-pill">3</span>
-                        </a>
+                        </a> {% endcomment %}
                     </li>
                     <li class="nav-item">
                         <a class="nav-link btn-icon darkmode" href="#"> <i class="material-icons md-nights_stay"></i> </a>

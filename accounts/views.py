@@ -165,7 +165,7 @@ def forgotpassword(request):
 
 
 
-########################## admin   ####################################
+########################## admin ####################################
 
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)

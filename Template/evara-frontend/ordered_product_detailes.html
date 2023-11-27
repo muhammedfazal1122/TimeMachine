@@ -22,6 +22,7 @@ Order Summary
     <section class="mt-50 mb-50">
         <div class="container">
             <h3 class="text-center mb-10">Review Your Order And Make Payment</h3>
+            
             <div class="row">
                 <div class="col-md-6">
                     <div class="card">
@@ -47,16 +48,18 @@ Order Summary
                                         <th colspan="2">Product</th>
                                         <th>Price</th>
                                     </tr>
+                                    
                                 </thead>
                                 <tbody>
                                     {% for ordered_product in ordered_products %}
                                     <tr>
                                         <td class="image product-thumbnail"><img src="{{ordered_product.product.images.url }}" alt="#"></td>
                                         <td>
+                                            
                                             <h5><a href="shop-product-full.html">{{ordered_product.product.product_name}}</a></h5> <span class="product-qty">x {{ordered_product.quantity}}</span>
                                             <p class="font-xs">
                                               
-                                         
+                                                    
                                                     {{ordered_product.variation_category | capfirst}}  {{ordered_product.variation_value | capfirst}}<br>
                                                
                                            
@@ -80,6 +83,10 @@ Order Summary
                         <div class="table-responsive">
                             <table class="table">
                                 <tbody>
+                                    <tr>
+                                        <td class="cart_total_label">Transaction Id :</td>
+                                        <td class="cart_total_amount"><span class="font-xs fw-700 ">{{order.payment.payment_id}}</span></td>
+                                    </tr>
                                     <tr>
                                         <td class="cart_total_label">Cart Subtotal</td>
                                         <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{order.total}}</span></td>

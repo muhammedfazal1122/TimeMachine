@@ -187,3 +187,6 @@ def shop_by_category(request, category_name):
     return render(request, "evara-frontend/shop-list-left.html", {'products': products})
 
 
+
+
+

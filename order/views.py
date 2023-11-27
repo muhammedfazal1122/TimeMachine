@@ -3,6 +3,10 @@ from django.shortcuts import render, redirect,reverse,get_object_or_404
 from django.http import HttpResponse
 from django.http import JsonResponse
 import datetime
+import random
+import string
+from django.views import View
+from order.models import Coupon,Coupon_Redeemed_Details
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -289,3 +293,62 @@ def admn_product_order(request):
 
     return render(request,"evara-backend/page-orders-detail.html",context)
 
+
+
+
+
+class AdmnCouponManagementView(View):
+    template_name = "evara-backend/admin-coupon-management.html"
+
+    def get(self, request, *args, **kwargs):
+        coupons = Coupon.objects.all()
+        context = {
+            'coupons': coupons,
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        coupon_code = request.POST.get("couponcode")
+        discount_amount = request.POST.get("discount")
+        minimum_amount = request.POST.get("minimumAmount")
+        valid_to = request.POST.get("couponexpiry")
+
+
+        # Check if a coupon with the same code already exists
+        if Coupon.objects.filter(coupon_code=coupon_code).exists():
+            messages.warning(request,"Coupon Code is Alredy Exist")
+            coupons = Coupon.objects.all()
+            return render(request, self.template_name, {"coupons": coupons, "error": "Duplicate coupon code"})
+
+        coupon = Coupon.objects.create(
+            coupon_code=coupon_code,
+            discount_amount=discount_amount,
+            minimum_amount=minimum_amount,
+            valid_to=valid_to
+        )
+        
+
+
+        coupons = Coupon.objects.all()
+        # Render the same template with the updated list of coupons
+        return redirect("orders:admn_coupon_management")
+    
+
+
+def generate_code(request):
+  alphabet = string.ascii_uppercase + string.ascii_lowercase + string.digits
+  code = ''.join(random.choice(alphabet) for i in range(8))
+  return JsonResponse({'code': code})
+
+
+# def edit_coupon(request,):
+#     return render(request,"evara-backend/edit-coupon.html")
+
+
+
+def delete_coupon(request,id):
+    
+    coupon = get_object_or_404(Coupon, id=id)
+    coupon.delete()
+    return redirect("orders:admn_coupon_management") 

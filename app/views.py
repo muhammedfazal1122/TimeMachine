@@ -28,8 +28,8 @@ def index(request):
         'brand':brand,
         'categories':categories,
         'cart':cart,
-
     }
+    
     return render(request,"evara-frontend/index.html",context)
 
 

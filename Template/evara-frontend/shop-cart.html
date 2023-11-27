@@ -215,7 +215,7 @@ Cart Page
                 $('.button-minus').click(function (e) {
                     e.preventDefault();
         
-                    var productId = $(this).closest('tr').find('#product_id').val();
+                    var productId = $(this).closest('tr').find('#prduct_id').val();
                     var itemCounter = parseInt($(this).closest('tr').find('#item_counter').val(), 10);
                     var cartItemId = $(this).closest('tr').find('#cart_id').val();
                     var qtyInput = $(this).closest('.product_data').find('.qty');

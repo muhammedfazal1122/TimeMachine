@@ -12,4 +12,7 @@ urlpatterns = [
 
     path('admn_sales_report/', views.admn_sales_report, name='admn_sales_report'),
 
+    path('sales-report', views.sales_report, name='sales-report'),
+
+
 ]

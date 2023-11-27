@@ -6,7 +6,7 @@ from django.contrib import messages
 from product.models import Product
 from product.models import ProductVariation
 from cart.models import Cart,CartItem
-from django.http import JsonResponse
+from django.http import HttpRequest, JsonResponse
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import AdressBook
@@ -33,6 +33,7 @@ def add_cart(request,product_id):
             print(key,value)
 
     product = Product.objects.get(id=product_id)
+    variation = Variation.objects.get(product=product)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request), user=current_user) #get cart item  by using the cart_id present in session
     except Cart.DoesNotExist:
@@ -42,7 +43,7 @@ def add_cart(request,product_id):
         )
     cart.save()
     try:
-        cart_items = CartItem.objects.get(product=product, cart=cart, user=current_user)
+        cart_items = CartItem.objects.get(variation=variation, cart=cart, user=current_user)
         cart_items.quantity +=1
         cart_items.save()
 
@@ -110,6 +111,8 @@ def checkout(request, total=0, quantity=0, cart_items=None):
 
     try:
         grand_total = 0
+        total = 0
+        quantity = 0
 
         if current_user.is_authenticated:
             cart_items = CartItem.objects.filter(user=current_user, is_active=True)
@@ -281,7 +284,7 @@ def remove_cart_item_fully(request):
 
             else:
                 # If the quantity is 1, delete the cart item
-                cart_item.delete()
+                pass
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
@@ -291,7 +294,7 @@ def remove_cart_item_fully(request):
 
 
     if new_quantity == 0:
-        message = "out of stock"
+        message = "Cart is Empty"
         return JsonResponse({'status': 'error', 'message': message})
     else:
         return JsonResponse({
@@ -304,5 +307,24 @@ def remove_cart_item_fully(request):
             "grand_total": grand_total,
             
         })
+    
+def add_to_cart_icon(request, product_id, quantity=1):
+    print('helo worlds')
+    user = request.user
+    product = Product.objects.get(id=product_id)
+    cart = Cart.objects.get(user=request.user)
+    cart_item, created = CartItem.objects.get_or_create(product=product, cart=cart)
 
+    if quantity > product.quantity:
+        # Redirect to the previous page if quantity is greater than available stock
+        redirect_url = request.META.get('HTTP_REFERER', '/')
+        return redirect(redirect_url)
 
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    else:
+        cart_item.quantity = quantity
+        cart_item.save()
+
+    return JsonResponse({"success": True})

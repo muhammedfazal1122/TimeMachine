@@ -98,7 +98,7 @@ def admn_enable_disable_categories(request,id):
     return redirect('category:admn_product_category')
 
 def shop_by_category(request, category_name):
-    products = Product.objects.filter(category__category_name=category_name)
+    products = Product.objects.filter(category__category_name=category_name,is_available=True)
     return render(request, "evara-frontend/shop-list-left.html", {'products': products})
 
 

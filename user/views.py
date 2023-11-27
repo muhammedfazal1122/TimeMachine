@@ -19,6 +19,8 @@ from user.models import AdressBook
 from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime, timedelta
+from order.models import OrderProduct
+from django.db.models import Sum
 
 
 
@@ -261,3 +263,48 @@ def is_valid_date(date_str):
         return False
     except ValueError:
         return True
+
+
+
+
+def get_weekly_sales():
+    end_date = timezone.now()
+    start_date = end_date - timezone.timedelta(days=7)
+
+    return OrderProduct.objects.filter(
+        order__created_at__range=(start_date, end_date)
+    ).values('product__product_name').annotate(weekly_sales=Sum('quantity'))
+
+
+
+def get_monthly_sales():
+    end_date = timezone.now()
+    start_date = end_date - timezone.timedelta(days=30)
+
+    return OrderProduct.objects.filter(
+        order__created_at__range=(start_date, end_date)
+    ).values('product__product_name').annotate(monthly_sales=Sum('quantity'))
+
+
+
+def get_yearly_sales():
+    end_date = timezone.now()
+    start_date = end_date - timezone.timedelta(days=365)
+
+    return OrderProduct.objects.filter(
+        order__created_at__range=(start_date, end_date)
+    ).values('product__product_name').annotate(yearly_sales=Sum('quantity'))
+
+
+
+def sales_report(request):
+    weekly_sales_data = list(get_weekly_sales().values('product__product_name','weekly_sales'))  ## Convert QuerySet to a list of dictionaries
+    monthly_sales_data = list(get_monthly_sales().values('product__product_name','monthly_sales'))
+    yearly_sales_data = list(get_yearly_sales().values('product__product_name','yearly_sales'))
+    sales_data = {
+        'weekly_sales': weekly_sales_data,
+        'monthly_sales': monthly_sales_data,
+        'yearly_sales': yearly_sales_data,
+    }
+    return JsonResponse(sales_data, safe=False)
+

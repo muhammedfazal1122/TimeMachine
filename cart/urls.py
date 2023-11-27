@@ -8,6 +8,7 @@ urlpatterns = [
     
     path('cart/', views.cart, name='cart'), 
     path('add_cart/<int:product_id>/', views.add_cart, name='add_cart'),  
+    path('add_to_cart_icon/<int:product_id>/', views.add_to_cart_icon, name='add_to_cart_icon'),  
  
 
     path('ajax/update/cart/', views.newcart_update, name='newcart_update'),

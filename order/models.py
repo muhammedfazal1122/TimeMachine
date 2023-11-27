@@ -94,6 +94,27 @@ class OrderProduct(models.Model):
  
 
 
+class Coupon(models.Model):
+    coupon_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    minimum_amount = models.IntegerField(default=1000)
+    valid_to = models.DateField()
+
+
+
+
+    def is_redeemed_by_user(self, user):
+        redeemed_details = Coupon_Redeemed_Details.objects.filter(coupon=self, user=user, is_redeemed=True)
+        return redeemed_details.exists()
+
+
+class Coupon_Redeemed_Details(models.Model):
+    user = models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
+    date_added = models.DateField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_redeemed = models.BooleanField(default=False)
+
 
     
        
