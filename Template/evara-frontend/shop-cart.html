@@ -8,7 +8,13 @@ Cart Page
 
 {% block content %}
 <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-    
+
+    <!-- alertify -->
+   <!-- CSS -->
+   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
+   <!-- Default theme -->
+   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/themes/default.min.css"/>
+       
     <main class="main">
 
         <section class="mt-50 mb-50">
@@ -21,6 +27,7 @@ Cart Page
                                     <tr class="main-heading">
                                         <th scope="col">Image</th>
                                         <th scope="col">Name</th>
+                                        <th scope="col">Colour</th>
                                         <th scope="col">Price</th>
                                         <th scope="col">Quantity</th>
                                         <th scope="col">Subtotal</th>
@@ -34,9 +41,12 @@ Cart Page
                                         <td class="image product-thumbnail"><img src=" {{cart_item.product.images.url}} " alt="#"></td>
                                         <td class="product-des product-name" style=" padding: 20px;  padding-left: 100px; padding-right: 100px; "> 
                                             <h5 class="product-name"><a href="shop-product-right.html">{{cart_item.product.product_name}}</a></h5>
+
                                             <p class="font-xs"> {{cart_item.product.description}}<br> 
                                             </p>
                                         </td>
+                                        <td class="variation" data-title="variation"><span id="variation"> {{cart_item.variations}}</span></td>
+
                                         <td class="price" data-title="Price"><span id="cart_item_total"> {{cart_item.product.price}}</span></td>
 
 
@@ -61,16 +71,17 @@ Cart Page
                                             </div>
                                         </td>
 
-
+                                        
 
 
 
                                         <td class="text-right" data-title="Cart">
                                             <span>${{cart_item.sub_total}}</span>
+                                           
                                         </td>
                                         {% comment %} <a type="" class="delete_quantity" data-product-id="{{ cart_item.product.id }}"><i class="fi-rs-angle-small-down"></i></a> {% endcomment %}
                                         <td  class="action" data-title="Remove">
-                                            <form id="cartItemForm" action="{% url 'cart:Remove_cart_item' cart_item.product.id %}" method="post">
+                                            <form id="cartItemForm" action="{% url 'cart:Remove_cart_item' cart_item.variations.id %}" method="post">
                                                 {% csrf_token %}
                                                 <button type="button" onclick="confirmRemoval(this.form)" class="text-muted border-0 bg-white" > <i class="fi-rs-trash"></i>
                                                 </button>
@@ -80,7 +91,7 @@ Cart Page
                                     
                                     <tr>
                                         <td colspan="6" class="text-end">
-                                            <a href="#" class="text-muted"> <i class="fi-rs-cross-small"></i> Clear Cart</a>
+                                            {% comment %} <a href="#" class="text-muted"> <i class="fi-rs-cross-small"></i> Clear Cart</a> {% endcomment %}
                                         </td>
                                     </tr>
                                     
@@ -99,27 +110,7 @@ Cart Page
                                 </div>
                                 <p class="mt-15 mb-30">Flat rate: <span class="font-xl text-brand fw-900">5%</span></p>
                                 
-                                <div class="mb-30 mt-50">
-                                    <div class="heading_s1 mb-3">
-                                        <h4>Apply Coupon</h4>
-                                    </div>
-                                    <div class="total-amount">
-                                        <div class="left">
-                                            <div class="coupon">
-                                                <form action="#" target="_blank">
-                                                    <div class="form-row row justify-content-center">
-                                                        <div class="form-group col-lg-6">
-                                                            <input class="font-medium" name="Coupon" placeholder="Enter Your Coupon">
-                                                        </div>
-                                                        <div class="form-group col-lg-6">
-                                                            <button class="btn  btn-sm"><i class="fi-rs-label mr-10"></i>Apply</button>
-                                                        </div>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                             </div>
                             <div class="col-lg-6 col-md-12">
                                 <div class="border p-md-4 p-30 border-radius cart-totals">
@@ -131,7 +122,7 @@ Cart Page
                                             <tbody>
                                                 <tr>
                                                     <td class="cart_total_label">Cart Subtotal</td>
-                                                    <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{sub_total}}.00</span></td>
+                                                    <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{total}}</span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="cart_total_label">Shipping</td>
@@ -139,7 +130,7 @@ Cart Page
                                                 </tr>
                                                 <tr>
                                                     <td class="cart_total_label">Total</td>
-                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">${{total}}.00</span></strong></td>
+                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">${{total}}</span></strong></td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -154,6 +145,11 @@ Cart Page
         </section>
     </main>
    
+   
+    <!-- alertify -->
+
+    <!-- JavaScript -->
+    <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
 
 	<!-- </form> -->
     <script>
@@ -277,6 +273,14 @@ Cart Page
                 }
                    
             
+            </script>
+            <script>
+                alertify.set('notifier','position', 'top-center');
+                {% for msg in messages %}
+            
+                    alertify.success('{{msg}}');
+                {%endfor%}
+                 
             </script>
         
 

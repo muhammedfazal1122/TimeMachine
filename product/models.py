@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 from brand.models import Brand
 from django.urls import reverse
 from datetime import datetime
-
+from django.db.models import CheckConstraint, Q, F
 # Create your models here.
 
 
@@ -29,27 +29,19 @@ class Product(models.Model):
     quantity = models.IntegerField(default=25)
     soft_deleted = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=Q(max_price__gte=F('price')),
+                name='check_max_price_gte_price',
+            ),
+        ]
+
 
 
     def __str__(self) :
         return self.product_name
-    
-    # def product_price(self):
-    #     offer_percentage = 0
-
-    #     if self.category.categoryoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).exists():
-    #         offer_percentage = self.category.categoryoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).values_list('discount_percentage',flat=True).order_by('-discount_percentage').first()
-    #     if self.productoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).exists():
-    #         offer_percentage = offer_percentage + self.productoffer_set.filter(is_active=True, expire_date__gte=datetime.now()).values_list('discount_percentage',flat=True).order_by('-discount_percentage').first()  
-
-
-        # if offer_percentage >= 100:
-        #     offer_percentage = 100
-            
-
-        # offer_price = self.price -  self.price * (offer_percentage) / (100)
-
-        # return round(offer_price)
+   
 
 
 class VariationManager(models.Manager):
@@ -71,7 +63,7 @@ class Variation(models.Model):
     objects = VariationManager()
 
     def __str__(self) -> str:
-        return f"{self.variation_value}-{self.variation_category}"
+        return f"{self.variation_value}"
     
     def __unicode__(self):
         return self.product

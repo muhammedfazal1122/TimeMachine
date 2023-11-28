@@ -798,11 +798,22 @@
                                                 <span>{{product.offer_percentage}}%</span>
                                             </span>
                                         </div>
+                                        {% if product.max_price != product.price %}
+                                            
                                         <div class="product-price">
                                             <span>${{product.price}} </span>
                                   
                                             <span class="old-price">${{product.max_price}}</span>
                                         </div>
+
+                                        {% elif product.max_price == product.price %}
+
+                                        <div class="product-price">
+                                            <span>${{product.max_price}} </span>
+                                  
+                                        </div>
+                                        {% endif %}
+
                                         <div class="product-action-1 show">
                                             <button id="product_id" aria-label="Add To Cart" class="action-btn hover-up" onclick="add_to_cart_icon({{ product.id }})" ><i class="fi-rs-shopping-bag-add"></i></button>
                                         </div>

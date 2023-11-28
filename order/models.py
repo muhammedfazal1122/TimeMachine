@@ -101,10 +101,14 @@ class Coupon(models.Model):
     valid_to = models.DateField()
 
 
+    def Is_Redeemed_By_User_New(self, request, user):
+        coupon_code = request.POST.get("couponCode")
 
+        # Assuming there is a Coupon model with a field named 'coupon_code'
+        coupon = Coupon.objects.get(coupon_code=coupon_code)
 
-    def is_redeemed_by_user(self, user):
-        redeemed_details = Coupon_Redeemed_Details.objects.filter(coupon=self, user=user, is_redeemed=True)
+        redeemed_details = Coupon_Redeemed_Details.objects.filter(coupon=coupon, user=user)
+
         return redeemed_details.exists()
 
 
@@ -114,17 +118,3 @@ class Coupon_Redeemed_Details(models.Model):
     date_added = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_redeemed = models.BooleanField(default=False)
-
-
-    
-       
-        
-         
-          
-           
-
-            
-             
-              
-
-

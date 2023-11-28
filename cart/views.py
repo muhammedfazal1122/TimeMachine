@@ -33,7 +33,8 @@ def add_cart(request,product_id):
             print(key,value)
 
     product = Product.objects.get(id=product_id)
-    variation = Variation.objects.get(product=product)
+    variation = Variation.objects.get(product=product,variation_value=value)
+    print("PPPPPPPPPPPPPPP",variation)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request), user=current_user) #get cart item  by using the cart_id present in session
     except Cart.DoesNotExist:
@@ -43,7 +44,7 @@ def add_cart(request,product_id):
         )
     cart.save()
     try:
-        cart_items = CartItem.objects.get(variation=variation, cart=cart, user=current_user)
+        cart_items = CartItem.objects.get(variations=variation, cart=cart, user=current_user)
         cart_items.quantity +=1
         cart_items.save()
 
@@ -51,6 +52,7 @@ def add_cart(request,product_id):
         cart_items = CartItem.objects.create(
             product=product,
             cart=cart,
+            variations=variation,
             quantity=1,
             user=current_user,  
             is_active=True,
@@ -81,7 +83,7 @@ def cart(request,total=0,quantity=0,cart_items=None):
         "cart_items":cart_items
 
     }
-    
+   
    
     return render(request,"evara-frontend/shop-cart.html",context)
 
@@ -89,11 +91,11 @@ def cart(request,total=0,quantity=0,cart_items=None):
 
 
 
-def Remove_cart_item(request,product_id):
+def Remove_cart_item(request,variations):
     
     cart = Cart.objects.get(user=request.user)
-    product = get_object_or_404(Product, id=product_id)
-    cart_item = CartItem.objects.filter(product=product,cart=cart)
+    variations = get_object_or_404(Variation, id=variations)
+    cart_item = CartItem.objects.filter(variations=variations,cart=cart)
     cart_item.delete()
     return redirect('cart:cart')
 
@@ -188,7 +190,7 @@ def add_address(request):
 
 
 
-
+    
 
 
  
@@ -294,7 +296,7 @@ def remove_cart_item_fully(request):
 
 
     if new_quantity == 0:
-        message = "Cart is Empty"
+        message = "Sorry, the quantity cannot be less than 1. If you want to remove this item, please use the 'Remove' option instead."
         return JsonResponse({'status': 'error', 'message': message})
     else:
         return JsonResponse({

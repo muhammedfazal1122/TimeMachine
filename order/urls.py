@@ -19,8 +19,8 @@ urlpatterns = [
     path('delete_coupon/<int:id>/', views.delete_coupon, name='delete_coupon'),
     path('admn_coupon_management/', views.AdmnCouponManagementView.as_view(), name='admn_coupon_management'),
     path('generate_code/', views.generate_code, name='generate_code'),
-    # path('edit_coupon/', views.edit_coupon, name='edit_coupon'),
+    path('apply_coupon/', views.apply_coupon, name='apply_coupon'),
     
-
+    
 
 ]

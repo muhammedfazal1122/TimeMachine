@@ -76,19 +76,31 @@ def order_placed(request, total=0, quantity=0):
     grand_total = 0
     tax = 0
 
+
     for cart_item in cart_items:
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
+        if cart_item.variations:
+            variation_value = cart_item.variations.variation_value
+
+
     tax = (2 * total) / 100
 
     grand_total = total + tax
+    
     
 
 
 
     if request.method == 'POST':
         selected_payment_option = request.POST.get('payment_option')
+        coupon=request.POST.get('coupon')
+        total_final=request.POST.get('total_final')
+        if coupon :
+            grand_total = total_final
+            total = total_final
 
+            print("rrrrrrrrrrrrrrrrrrrr",total_final,coupon,grand_total)
         
         try:
             address = AdressBook.objects.get(user=request.user, is_default=True)
@@ -138,24 +150,40 @@ def order_placed(request, total=0, quantity=0):
         ordered_products = []
 
         # Create ordered products
+        # Create ordered products
         for cart_item in cart_items:
-            ordered_product = OrderProduct.objects.create(
-
-                user=current_user,
-                order=data,
-                payment=payment,
-                product=cart_item.product,
-                product_price=cart_item.product.price,
-                quantity=cart_item.quantity,
-                is_ordered=True,
-
-            )
-            ordered_product.save()
-            ordered_products.append(ordered_product)
+            # Check if the cart item has a variation
+            if cart_item.variations:
+                # Note: Assuming that variations is a ForeignKey in CartItem
+                variation = cart_item.variations
+                ordered_product = OrderProduct.objects.create(
+                    user=current_user,
+                    order=data,
+                    payment=payment,
+                    product=cart_item.product,
+                    product_price=cart_item.product.price,
+                    quantity=cart_item.quantity,
+                    is_ordered=True,
+                )
+                # Assign the variation value to the OrderProduct
+                ordered_product.variations.add(variation)
+                ordered_product.save()
+                ordered_products.append(ordered_product)
+            else:
+                # If no variation, create a single OrderProduct without variations
+                ordered_product = OrderProduct.objects.create(
+                    user=current_user,
+                    order=data,
+                    payment=payment,
+                    product=cart_item.product,
+                    product_price=cart_item.product.price,
+                    quantity=cart_item.quantity,
+                    is_ordered=True,
+                )
+                ordered_products.append(ordered_product)
 
         # Remove cart items after ordering
         cart_items.delete()
-
         context = {
             'order': data,
             'cart_items': cart_items,
@@ -295,6 +323,7 @@ def admn_product_order(request):
 
 
 
+#-------------------------------------------COUPONSSSSSS---------------------------------------------------#
 
 
 class AdmnCouponManagementView(View):
@@ -342,13 +371,46 @@ def generate_code(request):
   return JsonResponse({'code': code})
 
 
-# def edit_coupon(request,):
-#     return render(request,"evara-backend/edit-coupon.html")
-
-
-
 def delete_coupon(request,id):
     
     coupon = get_object_or_404(Coupon, id=id)
     coupon.delete()
     return redirect("orders:admn_coupon_management") 
+
+
+
+
+
+
+def apply_coupon(request):
+    if request.method == "POST":
+        coupon_code = request.POST.get("couponCode")
+        total = request.POST.get("total")
+        user = request.user
+
+        try:
+            coupon = Coupon.objects.get(coupon_code=coupon_code, valid_to__gte=timezone.now())
+            print("ffffffffffffffffffffffffffffff")
+            if coupon.Is_Redeemed_By_User_New(request,user):
+                print("gggggggggggggggggggggggggggggg")
+
+                messages.warning(request,"User Already Used The Coupon")
+                return redirect('cart:checkout')
+            else:
+                if not coupon.Is_Redeemed_By_User_New(request,user):
+                    # If not redeemed yet, save the redemption details
+                    new_redeemed_detail = Coupon_Redeemed_Details(coupon=coupon, user=user)
+                    new_redeemed_detail.save()
+                print("mmmmmmmmmmmmmmmmmmmmmmmm")
+
+                return JsonResponse( {'success': True, 'coupon': coupon.discount_amount} )
+        except Coupon.DoesNotExist:
+            messages.warning(request, 'Invalid coupon code or expired.')
+            return redirect('cart:checkout')
+        except Exception as e:
+            print("Error applying coupon:", e)
+            # Handle the exception appropriately or provide a fallback response
+            return redirect('cart:checkout')
+
+    return redirect('cart:checkout')
+

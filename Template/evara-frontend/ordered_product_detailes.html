@@ -59,9 +59,11 @@ Order Summary
                                             <h5><a href="shop-product-full.html">{{ordered_product.product.product_name}}</a></h5> <span class="product-qty">x {{ordered_product.quantity}}</span>
                                             <p class="font-xs">
                                               
-                                                    
-                                                    {{ordered_product.variation_category | capfirst}}  {{ordered_product.variation_value | capfirst}}<br>
-                                               
+                                                {% if ordered_product.variations.all %}
+                                                {% for variation in ordered_product.variations.all %}
+                                                    {{ variation.variation_category }}: {{ variation.variation_value }}<br>
+                                                {% endfor %}
+                                                {% endif %}
                                            
                                             </p>
                                         </td>
