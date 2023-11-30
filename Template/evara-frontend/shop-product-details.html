@@ -87,8 +87,12 @@
                                         </div>
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
+                                                {% if products.price != products.max_price %}
                                                 <ins><span class="text-brand">${{products.price}}</span></ins>
                                                 <ins><span class="old-price font-md ml-15">${{products.max_price}}</span></ins>
+                                                {% else %}
+                                                <ins><span class="text-brand">${{products.price}}</span></ins>
+                                                {% endif %}
                                                 <span class="save-price  font-md color3 ml-15">{{products.offer_percentage}}%</span>
                                             </div>
                                         </div>

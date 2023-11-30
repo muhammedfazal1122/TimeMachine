@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.views.decorators.cache import cache_control
 from django.contrib.auth.decorators import login_required
-# from .models import Category
+from category.models import Category
 from django.contrib import messages
 from product.models import Product
 from product.models import ProductVariation
@@ -11,6 +11,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.core.exceptions import ObjectDoesNotExist
 from user.models import AdressBook
 from cart.models import Variation
+from decimal import Decimal
 
 
 
@@ -30,11 +31,9 @@ def add_cart(request,product_id):
         for item in request.POST:
             key = item
             value = request.POST[key]
-            print(key,value)
 
     product = Product.objects.get(id=product_id)
     variation = Variation.objects.get(product=product,variation_value=value)
-    print("PPPPPPPPPPPPPPP",variation)
     try:
         cart = Cart.objects.get(cart_id=_cart_id(request), user=current_user) #get cart item  by using the cart_id present in session
     except Cart.DoesNotExist:
@@ -70,9 +69,17 @@ def cart(request,total=0,quantity=0,cart_items=None):
         # cart_items =  CartItem.objects.filter(cart=cart,is_active=True)
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
 
-        for cartItem in cart_items:
-            total += cartItem.product.price * cartItem.quantity
-            quantity += cartItem.quantity
+        for cart_item in cart_items:
+            category_discount = cart_item.product.category.discount
+
+            if category_discount != 0:
+                cart_item.product.price = getCatogoryPrice(cart_item)
+                category_discount_applyed = cart_item.product.price
+
+
+
+            total += cart_item.product.price * cart_item.quantity
+            quantity += cart_item.quantity
            
     except :
         pass
@@ -80,7 +87,9 @@ def cart(request,total=0,quantity=0,cart_items=None):
         
         "quantity":quantity,
         "total":total,
-        "cart_items":cart_items
+        "cart_items":cart_items,
+        # "category_discount":category_discount,
+        "category_discount_applyed":category_discount_applyed,
 
     }
    
@@ -102,13 +111,30 @@ def Remove_cart_item(request,variations):
 
 
 
+def getCatogoryPrice(cart_item):
+    category_discount = Decimal(cart_item.product.category.discount)
+    category_minimum_amount = Decimal(cart_item.product.category.minimum_amount)
+    price = Decimal(cart_item.product.price)
+    end_date = cart_item.product.category.end_date
+
+    # Check if the category end date is expired
+    if not cart_item.product.category.is_expired() and category_minimum_amount < price:
+        discounted_price = price - (price * (category_discount / 100))
+        return discounted_price
+    else:
+        return price
+
+
+
 def checkout(request, total=0, quantity=0, cart_items=None):
     current_user=request.user
 
-    
+    # category_product =  Category.objects.get
     if not current_user.is_authenticated:
         messages.warning(request, "User must log in for Checkout")
         return redirect('app:index')
+    
+    category_discound = request.POST.get("category_discound")
     
 
     try:
@@ -120,8 +146,13 @@ def checkout(request, total=0, quantity=0, cart_items=None):
             cart_items = CartItem.objects.filter(user=current_user, is_active=True)
         else:
             pass
-
+        
         for cart_item in cart_items:
+            category_discount = cart_item.product.category.discount
+
+            if category_discount != 0:
+                cart_item.product.price = getCatogoryPrice(cart_item)
+                category_discount_applyed = cart_item.product.price
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
             sub_total = (cart_item.quantity * cart_item.product.price)
@@ -135,6 +166,8 @@ def checkout(request, total=0, quantity=0, cart_items=None):
     # print("address_list:", address_list)
 
     default_address = address_list.filter(is_default=True).first()
+    category = Category.objects.all()
+
     # print("default_address:", default_address)
     payment_method = request.POST.get('payment_option')
     print("Selected Payment Method:", payment_method)
@@ -147,6 +180,8 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         'address_list': address_list,
         'default_address': default_address,
         'sub_total':sub_total,
+        'category':category,
+
         
     }
 

@@ -6,12 +6,7 @@
     {% endblock title %}  
 
     {% block content %}
-    {% for message in messages %}
-    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-    <strong></strong>{{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
+  
 
     <!-- CSS -->
 <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/css/alertify.min.css"/>
@@ -168,20 +163,20 @@
                                         </div>
                                     </div>
                                     {% endfor %}
-                                <!-- LOOP ENDS-->
+                                    <!-- LOOP ENDS-->
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="order_review">
-                                <div class="mb-20">
-                                    <h4>Your Orders</h4>
+                            <div class="col-md-6">
+                                <div class="order_review">
+                                    <div class="mb-20">
+                                        <h4>Your Orders</h4>
                                 </div>
                                 <div class="table-responsive order_table text-center">
                                     <table class="table">
                                         <thead>
                                             <tr>
                                                 <th colspan="2">Product</th>
-                                                <th>Total</th>
+                                                <th>Price</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -193,14 +188,23 @@
                                                 </td>
                                                 <td>
                                                     <h5><a href="#">
-                                                        <span>{{ cart.product.name|truncatechars:40 }}</span>
+                                                        <span>{{ cart_item.product.product_name|truncatechars:40 }}</span>
                                                     </a></h5>
                                                     <span class="product-qty">x {{ cart_item.quantity }}</span>
                                                         <div>
-                                                    <span class="product-qty">{{ cart_item.variations.variation_value }}</span>
+                                                            <span class="font-sm ">Variation :{{ cart_item.variations.variation_value }}</span>
+                                                            <input type="hidden" id="category_discount" name="category_discount" value="{{cart_item.product.category.discount}}  ">
                                                         </div>
+                                                        <div>
+                                                    {% if  cart_item.product.category.discount != 0 %}
+                                                    <span class=" " style="color: red;">Category Offer:  {{cart_item.product.category.discount}} % Applied </span>
+                                                   
+
+                                                        </div>
+                                                    {% else %}
+                                                    {% endif %}
                                                 </td>
-                                                <td><span>$ {{ sub_total }}</span></td>
+                                                <td><span>$ {{ cart_item.product.price }}</span></td>
                                             </tr>
                                             {% endfor %}
                                             <!--PRODUCT LOOP ENDS HERE-->
@@ -245,6 +249,12 @@
                                                 Online Payment
                                             </label>
                                             </div>
+                                            <div>
+                                            <input class="form-check-input"  type="radio" value="Wallet" name="payment_option" id="exampleRadios5" >
+                                            <label class="form-check-label" for="exampleRadios5" aria-controls="bankTranfer">
+                                               Wallet
+                                            </label>
+                                            </div>
                                             
                                         </div>
                                     </div>
@@ -258,15 +268,20 @@
                     </div>
                 </form>
                 </div>
-            </section>            
+            </section>    
+
             <input type="hidden" id="total-amount" value="{{ total }}">
             <input type="hidden" id="csrf_token" value="{% csrf_token %}">
             
         </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
         <script>
+
             let couponCode
             let total_final =  document.getElementById('total-amount').value;
+            let category_discount =  document.getElementById('category_discount').value;
             function checkForCredentials(form) {
                
                 if(couponCode){
@@ -275,15 +290,22 @@
                         name: 'coupon',
                         value: couponCode
                     }).appendTo(form);
+                    
                     $('<input>').attr({
                         type: 'hidden',
                         name: 'total_final',
                         value: total_final
                     }).appendTo(form);
                 }
+                $('<input>').attr({
+                        type: 'hidden',
+                        name: 'category_discount',
+                        value: category_discount
+                    }).appendTo(form);
+                    
                 form.submit();
             }
-
+ 
             $('#coupon-btn').on('click', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
@@ -296,33 +318,56 @@
                     dataType: 'json',
                     data: { total: totalAmount, couponCode: couponCode },
                     beforeSend: function(xhr, settings) {
-                                        function getCookie(name) {
-                                            var cookieValue = null;
-                                            if (document.cookie && document.cookie != '') {
-                                                var cookies = document.cookie.split(';');
-                                                for (var i = 0; i < cookies.length; i++) {
-                                                    var cookie = jQuery.trim(cookies[i]);
-                                                    // Does this cookie string begin with the name we want?
-                                                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                                                        break;
-                                                    }
-                                                }
-                                            }
-                                            return cookieValue;
-                                        }
-                                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                                            // Only send the token to relative URLs i.e. locally.
-                                            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-                                        }
-                                    } ,
+                        function getCookie(name) {
+                            var cookieValue = null;
+                            if (document.cookie && document.cookie != '') {
+                                var cookies = document.cookie.split(';');
+                                for (var i = 0; i < cookies.length; i++) {
+                                    var cookie = jQuery.trim(cookies[i]);
+                                    // Does this cookie string begin with the name we want?
+                                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                        break;
+                                    }
+                                }
+                            }
+                            return cookieValue;
+                        }
+                        if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                            // Only send the token to relative URLs i.e. locally.
+                            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                        }
+                    } ,
                     success: function (response) {
-                        total_final= Math.ceil(totalAmount - ((response.coupon / 100 ) * totalAmount ))
-                        $('.total-amount-no-discount')
-                        .css("text-decoration","line-through")
-                        .prev()
-                        .text('\u20B9' + total_final);
+                        if (response.success) {
+                            console.log(response.success)
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message,
+                                timer: 2000,
+                                showConfirmButton: false,
+                            });
+
+                            total_final = Math.ceil(totalAmount - ((response.coupon / 100) * totalAmount))
+                            $('.total-amount-no-discount')
+                                .css("text-decoration", "line-through")
+                                .prev()
+                                .text('\u20B9' + total_final);
+
+                        } else {
+                            console.log(response.error)
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.error,
+                            });
+                        }
+                    
+                       
                     },
+                    
                     error: function (error) {
                         console.log(error)
                     }
@@ -332,3 +377,4 @@
 
  
     {% endblock content %}
+

@@ -20,6 +20,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime, timedelta
 from order.models import OrderProduct
+from user.models import Wallet,WalletTransaction
 from django.db.models import Sum
 
 
@@ -308,3 +309,31 @@ def sales_report(request):
     }
     return JsonResponse(sales_data, safe=False)
 
+
+#------------------------------------------------WALLET-------------------------------------------------------------------------#
+
+
+def my_wallet(request):
+    current_user = request.user
+    total_wallet_balance = 0
+    
+    try:
+        wallet = Wallet.objects.get(user=current_user)
+    except Wallet.DoesNotExist:
+        # Handle the case where the user doesn't have a wallet
+        messages.warning(request, 'You do not have a wallet yet. Creating a new wallet.')
+        wallet = Wallet.objects.create(user=current_user, balance=0)
+
+    wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+    increment_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Credit")
+    decement_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Debit")
+    print(increment_val,decement_val)
+    total_wallet_balance = increment_val - decement_val
+    # total_wallet_balance = sum(transaction.amount for transaction in wallet_transactions)
+
+    context = {
+        "wallet_transactions": wallet_transactions,
+        "wallet": wallet,
+        "total_wallet_balance": total_wallet_balance,
+    }
+    return render(request, "evara-frontend/my_wallet.html", context)

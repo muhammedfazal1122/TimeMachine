@@ -33,13 +33,26 @@
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
-                                    <textarea placeholder="Type here" class="form-control" name="descript
-                                    ion"></textarea>
+                                    <textarea placeholder="Type here" class="form-control" name="description"></textarea>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label" for="category_images">Category Image:</label>
                                     <input class="form-control" type="file" name="cat_image" accept="image/*" required><br>
                                 </div>
+
+                                <label for="discount" class="form-label">Discount</label>
+                                <input type="number" placeholder="Type here" class="form-control" id="discount" name="discount"  required oninput="validateDiscount(this)" />
+                                 </div>
+                                </div>
+                                <div class="mb-4">
+                                <label for="minimum_amount" class="form-label">minimum_amount </label>
+                                <input type="number" placeholder="Type here" class="form-control" id="minimum_amount" name="minimum_amount"  required oninput="validateDiscount(this)" />
+                                 </div>
+                                 <div class="mb-4">
+                                <label for="end_date" class="form-label"> End Date</label>
+                                <input type="date" placeholder="Type here" class="form-control" id="end_date" name="end_date" />
+                                 </div>
+        
                                 <div class="d-grid">
                                     <button class="btn btn-primary">Create category</button>
                                 </div>
@@ -49,7 +62,17 @@
                 </div> <!-- card body .// -->
             </div> <!-- card .// -->
         </section> <!-- content-main end// -->
-
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+ 
+        <script>
+            function validateDiscount(input) {
+                if (input.value < 0) {
+                    input.setCustomValidity('Value Cannot be less than 0.');
+                } else {
+                    input.setCustomValidity('');
+                }
+            }
+        </script>
 
 {% endblock content %}
 

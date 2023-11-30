@@ -9,10 +9,11 @@ urlpatterns = [
     path('add_address/', views.add_address, name='add_address'),
     path('delete_address/<int:address_id>/', views.delete_address, name='delete_address'),
     path('edit_address/<int:address_id>/', views.edit_address, name='edit_address'),
-
     path('admn_sales_report/', views.admn_sales_report, name='admn_sales_report'),
-
     path('sales-report', views.sales_report, name='sales-report'),
+
+#---------------------------- WALLET---------------------------------------#
+    path('my_wallet', views.my_wallet, name='my_wallet'),
 
 
 ]

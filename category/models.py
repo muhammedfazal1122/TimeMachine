@@ -2,7 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 from django.utils.text import slugify
 from django.urls import reverse
-
+from django.utils import timezone
+from datetime import datetime, timedelta
 # Create your models here.
 
 
@@ -13,6 +14,10 @@ class Category(models.Model):
     cat_image = models.ImageField(upload_to='photos/category',blank=True) 
     soft_deleted = models.BooleanField(default=False)
     is_available = models.BooleanField(default=True)
+    is_offer_available = models.BooleanField(default=False)
+    discount = models.IntegerField( default=0)
+    minimum_amount = models.IntegerField(default=100)
+    end_date = models.DateField(default=datetime.now() + timedelta(days=365))  # Assuming you want the end date one year from today
 
     class Meta:
         verbose_name = 'Category'
@@ -20,4 +25,5 @@ class Category(models.Model):
 
     def __str__(self) -> str:
         return self.category_name
-
+    def is_expired(self):
+        return self.end_date < timezone.now().date()

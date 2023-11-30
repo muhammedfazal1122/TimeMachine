@@ -24,7 +24,10 @@ def admn_add_category(request):
     if request.method=="POST":
         category_name=request.POST.get("category_name")
         slug=request.POST.get("slug")
-        description=request.POST.get("description")
+        description = request.POST.get("description", "")  # Default to an empty string if not provided
+        discount=request.POST.get("discount")
+        minimum_amount=request.POST.get("minimum_amount")
+        end_date=request.POST.get("end_date")
         cat_image=request.FILES.get("cat_image")
 
 
@@ -40,6 +43,9 @@ def admn_add_category(request):
                 slug=slug,
                 description=description,
                 cat_image=cat_image,
+                discount=discount,
+                minimum_amount=minimum_amount,
+                end_date=end_date,
             )
             categories.save()
             messages.success(request, 'Category Added Successfully')
@@ -57,6 +63,10 @@ def admn_edit_category(request,id):
         category.slug=request.POST.get('slug')
         category.description=request.POST.get('description')
         category.cat_image=request.FILES.get('cat_image')
+        category.discount=request.POST.get('discount')
+        category.minimum_amount=request.POST.get('minimum_amount')
+        category.end_date=request.POST.get('end_date')
+
         category.save()
         return redirect('category:admn_product_category')
     context={

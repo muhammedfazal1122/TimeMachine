@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 import datetime
 import random
+from decimal import Decimal
 import string
 from django.views import View
 from order.models import Coupon,Coupon_Redeemed_Details
@@ -28,6 +29,7 @@ from django.contrib import messages
 from django.utils import timezone
 # from datetime import datetime, timedelta
 from django.db.models import Sum
+from user.models import Wallet,WalletTransaction
 
 # Create your views here.
 
@@ -35,16 +37,6 @@ from django.db.models import Sum
 
 
 
-
-
-def cancel_order(request,order_id):
-    
-    order = get_object_or_404(Order, id=order_id)
-    if order.status=="Pending" or "Shipped":
-        order.status = "Cancelled"
-        order.save()
-   
-    return redirect("orders:my_orders") 
 
 
 def update_status(request):
@@ -61,34 +53,51 @@ def update_status(request):
 
 
 
+
+
+def getCatogoryPrice(cart_item):
+    category_discount = Decimal(cart_item.product.category.discount)
+    category_minimum_amount = Decimal(cart_item.product.category.minimum_amount)
+    price = Decimal(cart_item.product.price)
+    end_date = cart_item.product.category.end_date
+
+    # Check if the category end date is expired
+    if not cart_item.product.category.is_expired() and category_minimum_amount < price:
+        discounted_price = price - (price * (category_discount / 100))
+        return discounted_price
+    else:
+        return price
+
+
+
+
+
 @login_required(login_url='accounts:user-login')
 def order_placed(request, total=0, quantity=0):
     if not request.user.is_authenticated:
         return redirect('app:index')
 
-
     current_user = request.user
-
-    # If the cart count is less than 0, then redirect back to home
     cart_items = CartItem.objects.filter(user=current_user)
- 
 
     grand_total = 0
     tax = 0
 
-
     for cart_item in cart_items:
+        category_discount = cart_item.product.category.discount
+        
+        if category_discount != 0:
+            cart_item.product.price = getCatogoryPrice(cart_item)
+            category_discount_applyed = cart_item.product.price
+        
         total += (cart_item.product.price * cart_item.quantity)
         quantity += cart_item.quantity
+
         if cart_item.variations:
             variation_value = cart_item.variations.variation_value
 
-
     tax = (2 * total) / 100
-
     grand_total = total + tax
-    
-    
 
 
 
@@ -100,7 +109,6 @@ def order_placed(request, total=0, quantity=0):
             grand_total = total_final
             total = total_final
 
-            print("rrrrrrrrrrrrrrrrrrrr",total_final,coupon,grand_total)
         
         try:
             address = AdressBook.objects.get(user=request.user, is_default=True)
@@ -183,7 +191,7 @@ def order_placed(request, total=0, quantity=0):
                 ordered_products.append(ordered_product)
 
         # Remove cart items after ordering
-        cart_items.delete()
+        # cart_items.delete()
         context = {
             'order': data,
             'cart_items': cart_items,
@@ -191,6 +199,7 @@ def order_placed(request, total=0, quantity=0):
             'tax': tax,
             'grand_total': grand_total,
             'ordered_products':ordered_products,
+            "category_discount_applyed":category_discount_applyed
 
         }
 
@@ -212,6 +221,66 @@ def order_placed(request, total=0, quantity=0):
             data.payment=payment
             data.save()
             return render(request, "evara-frontend/online_payment.html", context)
+                   
+        elif selected_payment_option == "Wallet":
+
+       
+            try:
+
+                wallet = get_object_or_404(Wallet, user=current_user)
+                wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+
+                wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+
+                if wallet.balance >= data.total:
+                    current_user = request.user
+                    # wallet.balance = sum(transaction.amount for transaction in wallet_transactions)
+
+                    # Sufficient balance in the wallet, deduct the purchase amount
+                    wallet.balance -= data.total
+                    wallet.save()
+
+                    WalletTransaction.objects.create(
+                        wallet=wallet,
+                        amount=data.total,
+                        order=data,
+                        transaction_type="Debit",  # Use Debit to indicate money deduction
+                        transaction_detail="Purchase Order"
+                    )
+                    payment_id = f'uw{data.order_number}{data.id}'
+                    payment = Payment.objects.create(
+                        user=current_user,
+                        payment_method='Wallet',
+                        payment_id=payment_id,
+                        amount_paid=data.order_total,
+                        status='Pending')
+                    payment.save()
+                    data.payment = payment
+                    data.save()
+
+                else:
+                    # Insufficient balance, handle this case (e.g., show a message to the user)
+                    messages.warning(request, 'Insufficient balance in the wallet.')
+                    return redirect("cart:checkout")                                   
+
+
+            except WalletTransaction.DoesNotExist:
+                messages.warning(request, 'No WalletTransaction found. Creating a new one.')
+
+                # If no previous transactions, assume starting with a balance of 0
+                wallet.balance -= data.total
+                wallet.save()
+
+                WalletTransaction.objects.create(
+                    wallet=wallet,
+                    amount=data.total,
+                    order=data,
+                    transaction_type="Debit",  # Use Debit to indicate money deduction
+                    transaction_detail="Purchase Order"
+                )
+
+            return render(request, "evara-frontend/order_placed.html", context)
+
    
     return redirect("cart:checkout")                                   
 
@@ -267,8 +336,7 @@ def ordered_product_detailes(request, order_id):
     try:
         order = Order.objects.get(id=order_id, user=current_user)
     except Order.DoesNotExist:
-        # Handle the case where the order does not exist
-        # You can redirect or show an error message
+
         return HttpResponse("Order not found")
 
     ordered_products = OrderProduct.objects.filter(order=order)
@@ -381,7 +449,6 @@ def delete_coupon(request,id):
 
 
 
-
 def apply_coupon(request):
     if request.method == "POST":
         coupon_code = request.POST.get("couponCode")
@@ -390,27 +457,89 @@ def apply_coupon(request):
 
         try:
             coupon = Coupon.objects.get(coupon_code=coupon_code, valid_to__gte=timezone.now())
-            print("ffffffffffffffffffffffffffffff")
-            if coupon.Is_Redeemed_By_User_New(request,user):
-                print("gggggggggggggggggggggggggggggg")
-
-                messages.warning(request,"User Already Used The Coupon")
-                return redirect('cart:checkout')
+            if coupon.Is_Redeemed_By_User_New(request, user):
+                return JsonResponse({'error': "User Already Used The Coupon"})
             else:
-                if not coupon.Is_Redeemed_By_User_New(request,user):
-                    # If not redeemed yet, save the redemption details
+                if not coupon.Is_Redeemed_By_User_New(request, user):
                     new_redeemed_detail = Coupon_Redeemed_Details(coupon=coupon, user=user)
                     new_redeemed_detail.save()
-                print("mmmmmmmmmmmmmmmmmmmmmmmm")
 
-                return JsonResponse( {'success': True, 'coupon': coupon.discount_amount} )
+                return JsonResponse({'success': True, 'coupon': coupon.discount_amount, 'message': 'Coupon Applied Successfully'})
         except Coupon.DoesNotExist:
-            messages.warning(request, 'Invalid coupon code or expired.')
-            return redirect('cart:checkout')
+            return JsonResponse({'error': "Invalid coupon code or expired.", 'message': 'Invalid coupon code or expired.'})
         except Exception as e:
             print("Error applying coupon:", e)
-            # Handle the exception appropriately or provide a fallback response
-            return redirect('cart:checkout')
+            return JsonResponse({'error': "Error applying coupon:", 'message': 'Error applying coupon.'})
 
     return redirect('cart:checkout')
 
+
+
+def cancel_order(request, order_id):
+    current_user = request.user
+    cancellation_reason = request.POST.get("cancellation_reason")
+    order = get_object_or_404(Order, id=order_id)
+
+    try:
+        wallet = Wallet.objects.get(user=current_user)
+        wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+
+        # Calculate total wallet balance by iterating over transactions
+        increment_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="CREDIT")
+        decement_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="DEBIT")
+        print(increment_val,decement_val)
+        total_wallet_balance = increment_val - decement_val
+        wallet.balance = sum(transaction.amount for transaction in wallet_transactions)
+
+        # Use the first WalletTransaction, you might want to adjust this logic based on your requirements
+        wallet_transaction = wallet_transactions.first()
+
+        # Update wallet balance
+        wallet.balance = total_wallet_balance
+        wallet.save()
+
+        # Create a new wallet transaction
+        WalletTransaction.objects.create(
+            wallet=wallet,
+            amount=order.total,
+            order=order,
+            transaction_type="Credit",
+            transaction_detail="Canceled Order"
+        )
+
+        # Update order details
+        if order.status in ["Pending", "Shipped"]:
+            order.cancellation_reason = cancellation_reason
+            order.status = "Cancelled"
+            order.save()
+
+        # Redirect to my_orders page
+        return redirect("orders:my_orders")
+
+    except Wallet.DoesNotExist:
+        # Handle the case where the user doesn't have a wallet
+        messages.warning(request, 'Wallet does not exist. Creating a new one.')
+        wallet = Wallet.objects.create(user=current_user, balance=0)
+
+    except WalletTransaction.DoesNotExist:
+        # Handle the case where there is no existing WalletTransaction
+        messages.warning(request, 'WalletTransaction does not exist. Creating a new one.')
+
+    # Create a new wallet transaction
+    WalletTransaction.objects.create(
+        wallet=wallet,
+        amount=order.total,
+        order=order,
+        transaction_type="Credit",
+        transaction_detail="Canceled Order"
+    )
+
+    # Update order details
+    if order.status in ["Pending", "Shipped"]:
+        order.cancellation_reason = cancellation_reason
+        order.status = "Cancelled"
+        order.save()
+
+    # Redirect to my_orders page
+    return redirect("orders:my_orders")
+        

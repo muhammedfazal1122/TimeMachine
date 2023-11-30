@@ -42,8 +42,13 @@ Cart Page
                                         <td class="product-des product-name" style=" padding: 20px;  padding-left: 100px; padding-right: 100px; "> 
                                             <h5 class="product-name"><a href="shop-product-right.html">{{cart_item.product.product_name}}</a></h5>
 
-                                            <p class="font-xs"> {{cart_item.product.description}}<br> 
+                                            <p class="font-xs" > {{cart_item.product.description}}<br> 
                                             </p>
+                                            {% if cart_item.product.category.discount != 0 %}
+                                            <span class="" style="color: red;">Category Offer {{cart_item.product.category.discount}} % Applied </span>
+                                            {% else %}
+
+                                            {% endif %}
                                         </td>
                                         <td class="variation" data-title="variation"><span id="variation"> {{cart_item.variations}}</span></td>
 

@@ -35,7 +35,6 @@ def admn_product_list(request):
     
     context = {
 
-
         'products':products
 
     }

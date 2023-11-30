@@ -54,7 +54,7 @@
                                     </div>
                                     <div class="col-lg-3 d-flex align-items-center">
                                         <div>
-                                            <div><span class="h6 mb-2">PRICE: &#8377; {{ order_product.product.price }}</span></div>
+                                            <div><span class="h6 mb-2">PRICE: &#8377; {{ order_product.product_price}}</span></div>
                                             <div><span class="h6 mt-2">quantity: {{ order_product.quantity }}</span></div>
                                         </div>
                                     </div>
@@ -74,15 +74,14 @@
                                     <label for="orderID1"></label>
                                     <input type="number" id="orderID1" value="{{ order.id }}" hidden="hidden">
                                     {% if order.status == "Pending" or order.status == "Shipped" %}
-                                    
-                                <form action="{% url 'orders:cancel_order' order.id %}"  onsubmit="return false"   >
-                               
-                                    <button onclick="Confirm(this.form)"  class="btn btn-outline-warning">
-                                        <i class="material-icons md-close"></i>
-                                  
-                                            <span >Cancel Order</span>
-                                    </button>
-                                </form>
+                                    <form action="{% url 'orders:cancel_order' order.id %}" method="post" id="cancelOrderForm">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="cancellation_reason" id="cancellationReason">
+                                        <button type="button" onclick="Confirm()" class="btn btn-outline-warning">
+                                            <i class="material-icons md-close"></i>
+                                            <span>Cancel Order</span>
+                                        </button>
+                                    </form>
                                     {% else %}
 
                                     {% endif %}
@@ -112,27 +111,31 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
-    <script>
-        function Confirm(form) {
-            
-             Swal.fire({
 
-        title: 'Are you sure?',
-        text: 'Do you want to Cancel Order?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No, cancel',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            form.submit();
+
+
+    <script>
+        function Confirm() {
+            Swal.fire({
+                title: 'Are you sure?',
+                html: '<label for="swal-input1">Reason for Cancellation:</label><textarea id="swal-input1" class="swal2-input" rows="2" style="resize: vertical;" placeholder="Enter your reason here..."></textarea>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'No, cancel',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Retrieve the reason from the input field
+                    const cancellationReason = document.getElementById('swal-input1').value;
+                    // Set the reason in the hidden form field
+                    document.getElementById('cancellationReason').value = cancellationReason;
+                    // Submit the form
+                    document.getElementById('cancelOrderForm').submit();
+                }
+            });
         }
-        
-    });
-        }
-           
-    
     </script>
+    
 
 
     
