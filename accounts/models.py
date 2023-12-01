@@ -43,6 +43,7 @@ class Account(AbstractBaseUser):
     phonenumber = models.CharField(max_length=50)
     username = models.CharField(max_length=50,unique=True)
     email = models.EmailField(max_length=50,unique=True)
+    referral_id = models.UUIDField(max_length=8, default=uuid.uuid4, unique=True)
 
 
     # REQUIRED

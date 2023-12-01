@@ -204,7 +204,7 @@
                                                     {% else %}
                                                     {% endif %}
                                                 </td>
-                                                <td><span> &#8377  {{ cart_item.product.price }}</span></td>
+                                                <td><span> &#8377  {{ cart_item.product.price |floatformat:1}}</span></td>
                                             </tr>
                                             {% endfor %}
                                             <!--PRODUCT LOOP ENDS HERE-->
@@ -213,7 +213,7 @@
                                                 <th>SubTotal</th>
                                                 <td class="product-subtotal" colspan="2">
                                                     <span></span>
-                                                    <span class="total-amount-no-discount"> &#8377  {{ total }}</span>
+                                                    <span class="total-amount-no-discount"> &#8377  {{ total|floatformat:1 }}</span>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -225,7 +225,7 @@
                                                 <th>Total</th>
                                                 <td colspan="2" class="product-subtotal">
                                                     <span class="font-xl text-brand fw-900"></span>
-                                                    <span  class="total-amount-no-discount font-xl text-brand fw-900">&#8377; {{ total }}</span>
+                                                    <span  class="total-amount-no-discount font-xl text-brand fw-900">&#8377; {{ total|floatformat:1 }}</span>
                                                 </td>
                                             </tr>
                                             
@@ -270,7 +270,7 @@
                 </div>
             </section>    
 
-            <input type="hidden" id="total-amount" value="{{ total }}">
+            <input type="hidden" id="total-amount" value="{{ total|floatformat:1 }}">
             <input type="hidden" id="csrf_token" value="{% csrf_token %}">
             
         </main>
