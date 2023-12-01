@@ -221,25 +221,18 @@ def order_placed(request, total=0, quantity=0):
             data.payment=payment
             data.save()
             return render(request, "evara-frontend/online_payment.html", context)
-                   
+
         elif selected_payment_option == "Wallet":
 
-       
             try:
-
-                wallet = get_object_or_404(Wallet, user=current_user)
+                wallet = Wallet.objects.get(user=current_user)
+                print(wallet,"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
+                print(wallet.balance,"baallllaaaaaaaaa porth")
+                print(data.total,"ttooootttl, porth")
                 wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
 
-                wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
-
-                if wallet.balance >= data.total:
-                    current_user = request.user
-                    # wallet.balance = sum(transaction.amount for transaction in wallet_transactions)
-
-                    # Sufficient balance in the wallet, deduct the purchase amount
-                    wallet.balance -= data.total
-                    wallet.save()
-
+                # Assuming both wallet.balance and data.total are DecimalField or similar
+                if float(wallet.balance) >= float(data.total):
                     WalletTransaction.objects.create(
                         wallet=wallet,
                         amount=data.total,
@@ -247,30 +240,41 @@ def order_placed(request, total=0, quantity=0):
                         transaction_type="Debit",  # Use Debit to indicate money deduction
                         transaction_detail="Purchase Order"
                     )
+
+                    # Update wallet balance
+                    wallet.balance -= float(data.total)
+                    wallet.save()
+
                     payment_id = f'uw{data.order_number}{data.id}'
                     payment = Payment.objects.create(
                         user=current_user,
                         payment_method='Wallet',
                         payment_id=payment_id,
                         amount_paid=data.order_total,
-                        status='Pending')
+                        status='Pending'
+                    )
                     payment.save()
                     data.payment = payment
                     data.save()
-
+                    print(wallet.balance,"baallllaaaaaaaaa, ullil")
+                    print(data.total,"ttooootttl, ullil")
                 else:
+
+                    print(wallet.balance,"baallllaaaaaaaaa")
+                    print(data.total,"ttooootttl")
                     # Insufficient balance, handle this case (e.g., show a message to the user)
                     messages.warning(request, 'Insufficient balance in the wallet.')
-                    return redirect("cart:checkout")                                   
+                    return redirect("cart:checkout")
 
+            except Wallet.DoesNotExist:
+                messages.warning(request, 'No Wallet found.')
+                return redirect("cart:checkout")
 
             except WalletTransaction.DoesNotExist:
                 messages.warning(request, 'No WalletTransaction found. Creating a new one.')
+                # Handle the case where there is no existing WalletTransaction
 
-                # If no previous transactions, assume starting with a balance of 0
-                wallet.balance -= data.total
-                wallet.save()
-
+                # Create a new wallet transaction
                 WalletTransaction.objects.create(
                     wallet=wallet,
                     amount=data.total,
@@ -280,9 +284,7 @@ def order_placed(request, total=0, quantity=0):
                 )
 
             return render(request, "evara-frontend/order_placed.html", context)
-
-   
-    return redirect("cart:checkout")                                   
+                            
 
 
 
@@ -317,9 +319,7 @@ def online_payment(request):
         'total_amount': total_amount,
         'payment_method':payment_method,
         'payment_id':payment_id,
-        # 'payment_order_id':payment_order_id,
         
-
     }
 
     return render(request, "evara-frontend/order_placed.html", context)
@@ -479,24 +479,54 @@ def cancel_order(request, order_id):
     current_user = request.user
     cancellation_reason = request.POST.get("cancellation_reason")
     order = get_object_or_404(Order, id=order_id)
+    if order.status in ["Pending", "Shipped"]:
+        order.cancellation_reason = cancellation_reason
+        order.status = "Cancelled"
+        order.save()
 
-    try:
-        wallet = Wallet.objects.get(user=current_user)
-        wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
+    if order.payment.payment_method == "Wallet" or "Razorpay":
 
-        # Calculate total wallet balance by iterating over transactions
-        increment_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="CREDIT")
-        decement_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="DEBIT")
-        print(increment_val,decement_val)
-        total_wallet_balance = increment_val - decement_val
-        wallet.balance = sum(transaction.amount for transaction in wallet_transactions)
+        try:
+            wallet = Wallet.objects.get(user=current_user)
+            wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
 
-        # Use the first WalletTransaction, you might want to adjust this logic based on your requirements
-        wallet_transaction = wallet_transactions.first()
+            # Calculate total wallet balance by iterating over transactions
+            increment_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Credit")
+            decement_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Debit")
+            print(increment_val,decement_val)
+            total_wallet_balance = increment_val - decement_val
+            wallet.balance = total_wallet_balance
+            wallet.save()
 
-        # Update wallet balance
-        wallet.balance = total_wallet_balance
-        wallet.save()
+            # Use the first WalletTransaction, you might want to adjust this logic based on your requirements
+            wallet_transaction = wallet_transactions.first()
+
+            # Update wallet balance
+            wallet.balance = total_wallet_balance
+            wallet.save()
+
+            # Create a new wallet transaction
+            WalletTransaction.objects.create(
+                wallet=wallet,
+                amount=order.total,
+                order=order,
+                transaction_type="Credit",
+                transaction_detail="Canceled Order"
+            )
+
+            # Update order details
+
+            # Redirect to my_orders page
+            return redirect("orders:my_orders")
+
+        except Wallet.DoesNotExist:
+            # Handle the case where the user doesn't have a wallet
+            messages.warning(request, 'Wallet does not exist. Creating a new one.')
+            wallet = Wallet.objects.create(user=current_user, balance=0)
+
+        except WalletTransaction.DoesNotExist:
+            # Handle the case where there is no existing WalletTransaction
+            messages.warning(request, 'WalletTransaction does not exist. Creating a new one.')
 
         # Create a new wallet transaction
         WalletTransaction.objects.create(
@@ -507,39 +537,8 @@ def cancel_order(request, order_id):
             transaction_detail="Canceled Order"
         )
 
-        # Update order details
-        if order.status in ["Pending", "Shipped"]:
-            order.cancellation_reason = cancellation_reason
-            order.status = "Cancelled"
-            order.save()
 
-        # Redirect to my_orders page
-        return redirect("orders:my_orders")
-
-    except Wallet.DoesNotExist:
-        # Handle the case where the user doesn't have a wallet
-        messages.warning(request, 'Wallet does not exist. Creating a new one.')
-        wallet = Wallet.objects.create(user=current_user, balance=0)
-
-    except WalletTransaction.DoesNotExist:
-        # Handle the case where there is no existing WalletTransaction
-        messages.warning(request, 'WalletTransaction does not exist. Creating a new one.')
-
-    # Create a new wallet transaction
-    WalletTransaction.objects.create(
-        wallet=wallet,
-        amount=order.total,
-        order=order,
-        transaction_type="Credit",
-        transaction_detail="Canceled Order"
-    )
-
-    # Update order details
-    if order.status in ["Pending", "Shipped"]:
-        order.cancellation_reason = cancellation_reason
-        order.status = "Cancelled"
-        order.save()
-
-    # Redirect to my_orders page
     return redirect("orders:my_orders")
-        
+
+
+

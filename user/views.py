@@ -329,7 +329,9 @@ def my_wallet(request):
     decement_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Debit")
     print(increment_val,decement_val)
     total_wallet_balance = increment_val - decement_val
-    # total_wallet_balance = sum(transaction.amount for transaction in wallet_transactions)
+   
+    wallet.balance = total_wallet_balance
+    wallet.save()
 
     context = {
         "wallet_transactions": wallet_transactions,
