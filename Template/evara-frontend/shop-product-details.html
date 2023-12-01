@@ -88,10 +88,10 @@
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
                                                 {% if products.price != products.max_price %}
-                                                <ins><span class="text-brand">${{products.price}}</span></ins>
-                                                <ins><span class="old-price font-md ml-15">${{products.max_price}}</span></ins>
+                                                <ins><span class="text-brand"> &#8377  {{products.price}}</span></ins>
+                                                <ins><span class="old-price font-md ml-15"> &#8377  {{products.max_price}}</span></ins>
                                                 {% else %}
-                                                <ins><span class="text-brand">${{products.price}}</span></ins>
+                                                <ins><span class="text-brand"> &#8377  {{products.price}}</span></ins>
                                                 {% endif %}
                                                 <span class="save-price  font-md color3 ml-15">{{products.offer_percentage}}%</span>
                                             </div>
@@ -172,7 +172,7 @@
     <script>
         function add_to_cart_icon(product_id) {
 
-    $.ajax({
+        $.ajax({
         type: 'GET',
         url: '/cart/add_to_cart_icon/product_id',
         console.log('Esfgdgsgbsfbbsfta');

@@ -67,7 +67,7 @@ Order Summary
                                            
                                             </p>
                                         </td>
-                                        <td>${{ordered_product.product_price}}</td>
+                                        <td> &#8377  {{ordered_product.product_price}}</td>
                                     </tr>
                                     {% endfor %}
                                     
@@ -91,7 +91,7 @@ Order Summary
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Cart Subtotal</td>
-                                        <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{order.total}}</span></td>
+                                        <td class="cart_total_amount"><span class="font-lg fw-900 text-brand"> &#8377  {{order.total}}</span></td>
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Shipping</td>
@@ -99,7 +99,7 @@ Order Summary
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Total</td>
-                                        <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">${{order.total}}</span></strong></td>
+                                        <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand"> &#8377  {{order.total}}</span></strong></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -151,7 +151,7 @@ Order Summary
                         </div>
                         <button type="submit" name="submit" id="payment-form-btn" class="btn btn-fill-out btn-block mt-30">Pay
                             <span id="grand_total_update">
-                                ${{order.total}}
+                                 &#8377  {{order.total}}
                             </span>
                         </button>                    
                     </form> 

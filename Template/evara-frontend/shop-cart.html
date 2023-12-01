@@ -81,7 +81,7 @@ Cart Page
 
 
                                         <td class="text-right" data-title="Cart">
-                                            <span>${{cart_item.sub_total}}</span>
+                                            <span> &#8377  {{cart_item.sub_total}}</span>
                                            
                                         </td>
                                         {% comment %} <a type="" class="delete_quantity" data-product-id="{{ cart_item.product.id }}"><i class="fi-rs-angle-small-down"></i></a> {% endcomment %}
@@ -127,7 +127,7 @@ Cart Page
                                             <tbody>
                                                 <tr>
                                                     <td class="cart_total_label">Cart Subtotal</td>
-                                                    <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{total}}</span></td>
+                                                    <td class="cart_total_amount"><span class="font-lg fw-900 text-brand"> &#8377  {{total}}</span></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="cart_total_label">Shipping</td>
@@ -135,7 +135,7 @@ Cart Page
                                                 </tr>
                                                 <tr>
                                                     <td class="cart_total_label">Total</td>
-                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">${{total}}</span></strong></td>
+                                                    <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand"> &#8377  {{total}}</span></strong></td>
                                                 </tr>
                                             </tbody>
                                         </table>

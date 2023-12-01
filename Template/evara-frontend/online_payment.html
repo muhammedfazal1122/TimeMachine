@@ -62,7 +62,7 @@ Online Payment
                                            
                                             </p>
                                         </td>
-                                        <td>${{ordered_product.product.price}}</td>
+                                        <td> &#8377  {{ordered_product.product.price}}</td>
                                     </tr>
                                     {% endfor %}
                                     
@@ -82,7 +82,7 @@ Online Payment
                                 <tbody>
                                     <tr>
                                         <td class="cart_total_label">Cart Subtotal</td>
-                                        <td class="cart_total_amount"><span class="font-lg fw-900 text-brand">${{order.total}}</span></td>
+                                        <td class="cart_total_amount"><span class="font-lg fw-900 text-brand"> &#8377  {{order.total}}</span></td>
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Shipping</td>
@@ -90,7 +90,7 @@ Online Payment
                                     </tr>
                                     <tr>
                                         <td class="cart_total_label">Total</td>
-                                        <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand">${{order.total}}</span></strong></td>
+                                        <td class="cart_total_amount"><strong><span class="font-xl fw-900 text-brand"> &#8377  {{order.total}}</span></strong></td>
                                     </tr>
                                 </tbody>
                             </table>
