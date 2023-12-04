@@ -206,9 +206,10 @@
                                                 {% comment %} <a class="dropdown-item" href="#"><i class="material-icons md-receipt"></i>Billing</a> {% endcomment %}
                                                 <a class="dropdown-item" href="{% url "orders:my_orders" %}"><i class="material-icons md-help_outline"></i>My Orders</a> 
                                                 <a class="dropdown-item" href="{% url "user:my_wallet" %}"><i class="material-icons md-help_outline"></i>Wallet</a> 
+                                                <a class="dropdown-item" ><button  class="material-icons md-help_outline" onclick="copyToClipBoard()">Copy Invitation Code</button></a> 
                                                 <div class="dropdown-divider"></div>
                                                 <a class="dropdown-item text-danger" href="{% url 'accounts:user-logout' %}"><i class="material-icons md-exit_to_app"></i>Logout</a>
-                                               
+                                               <input type="hidden" value="{{user.referral_id}}" id="invitation">
                                             </div>
                                         </li>
                                                                                        
@@ -231,7 +232,7 @@
                 <div class="container">
                     <div class="header-wrap">
                         <div class="logo logo-width-1">
-                            <a href="index.html"><img style="width: 10px; ,height:10px"  src="{% static '/assets/imgs/theme/logo2.png' %}" alt="logo"></a>
+                            <a  href="{% url "app:index" %}" ><img style="width: 10px; ,height:10px"  src="{% static '/assets/imgs/theme/logo2.png' %}" alt="logo"></a>
                         </div>
                         <div class="header-right">
                             <div class="search-style-2">
@@ -297,13 +298,7 @@
                                         </li>
                                         
                                         
-                                        {% comment %} <li><a href="shop-grid-right.html"><i class="evara-font-desktop"></i>{{cat.category_name}}</a></li>
-                                        <li><a href="shop-grid-right.html"><i class="evara-font-cpu"></i>{{cat.category_name}}</a></li>
-                                        <li><a href="shop-grid-right.html"><i class="evara-font-diamond"></i>{{cat.category_name}}</a></li>
-                                        <li><a href="shop-grid-right.html"><i class="evara-font-home"></i>{{cat.category_name}}</a></li>
-                                        <li><a href="shop-grid-right.html"><i class="evara-font-high-heels"></i>{{cat.category_name}}</a></li> {% endcomment %}
-                                        {% comment %} <li><a href="shop-grid-right.html"><i class="evara-font-teddy-bear"></i>Mother & Kids</a></li>
-                                        <li><a href="shop-grid-right.html"><i class="evara-font-kite"></i>Outdoor fun</a></li> {% endcomment %}
+                                       
                                         <li>
                                         </li>
                                         
@@ -604,5 +599,23 @@
         <script src="{% static 'assets/js/main.js' %}"></script>
         <script src="{% static 'assets/js/shop.js' %}"></script>
 
+
+
+<script>
+
+            function copyToClipBoard() {
+                alertify.set('notifier', 'position', 'middle-center');
+                    let val = document.getElementById('invitation').value
+                    navigator.clipboard.writeText(val)
+                            .then(function() {
+                                alertify.success('Code copied to clipboard!');
+                            })
+                            .catch(function(error) {
+                                console.error('Error copying to clipboard: ', error);
+                                alertify.error('Something went wrong');
+                            });
+                }
+            
+</script>
 </body>
 </html>

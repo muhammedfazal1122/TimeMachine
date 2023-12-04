@@ -77,13 +77,7 @@
                                             <div class="pro-details-brand">
                                                 <span> <strong>Brand  &nbsp;&nbsp;:</strong>   <a href="shop-grid-right.html"><strong>{{products.brand}}</strong></a></span>
                                             </div>
-                                            <div class="product-rate-cover text-end">
-                                                <div class="product-rate d-inline-block">
-                                                    <div class="product-rating" style="width:90%">
-                                                    </div>
-                                                </div>
-                                                <span class="font-small ml-5 text-muted"> (25 reviews)</span>
-                                            </div>
+                                            
                                         </div>
                                         <div class="clearfix product-price-cover">
                                             <div class="product-price primary-color float-left">
@@ -93,7 +87,15 @@
                                                 {% else %}
                                                 <ins><span class="text-brand"> &#8377  {{products.price}}</span></ins>
                                                 {% endif %}
-                                                <span class="save-price  font-md color3 ml-15">{{products.offer_percentage}}%</span>
+                                                {% if products.category.discount != 0 %}
+
+                                                <div class="mt-15"  >
+                                                    <span class="mt-15"  style="color: #ff0000;"><i class="fi-rs-crown mr-5" style="color: #ff0000;"></i>This Category Have {{products.category.discount}}%  Offer </span>
+
+                                                </div>
+                                                {% endif %}
+
+                                                <!-- <span class="save-price  font-md color3 ml-15">{{products.offer_percentage}}%</span> -->
                                             </div>
                                         </div>
                                         <div class="bt-1 border-color-1 mt-15 mb-15"></div>
@@ -102,7 +104,6 @@
                                         </div>
                                         <div class="product_sort_info font-xs mb-30">
                                             <ul>
-                                                
                                                <li class="mb-10"><i class="fi-rs-crown mr-5"></i> 1 Year {{products.brand}} Brand Warranty </li>
                                                 <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return Policy</li>
                                                 <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery available</li>

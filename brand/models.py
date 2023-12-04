@@ -6,7 +6,9 @@ from django.utils.text import slugify
 class Brand(models.Model):
     brand_name = models.CharField(max_length=100,default="brandname")
     logo = models.ImageField( upload_to='photos/product' ,null=True)
-    slug = models.SlugField(unique=True, null=True, blank=True,default="brandname")
+    slug = models.SlugField( null=True, blank=True,default="brandname")
+    soft_deleted = models.BooleanField(default=False)
+
 
     class Meta:
         verbose_name = 'Brand'

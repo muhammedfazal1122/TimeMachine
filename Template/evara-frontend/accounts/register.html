@@ -68,7 +68,7 @@
                 </div>
             </div>
         </div>
-        <div class="header-bottom sticky-bar sticky-white-bg">
+        {% comment %} <div class="header-bottom sticky-bar sticky-white-bg">
             <div class="container">
                 <div class="header-wrap header-space-between position-relative">
                     <div class="logo logo-width-1">
@@ -76,7 +76,7 @@
                     </div> 
                 </div>
             </div>
-        </div>
+        </div> {% endcomment %}
     </header>
     <div class="mobile-header-active mobile-header-wrapper-style">
         <div class="mobile-header-wrapper-inner">
@@ -161,6 +161,9 @@
                                             </div>
                                             <div class="form-group">
                                                 <input required="" type="password" name="password2" placeholder="Confirm password" Required>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="referral_id" name="referral_id" placeholder="Refferal Id(Optional)" >
                                             </div>
                                             <div class="login_footer form-group">
                                                 <div class="chek-form">

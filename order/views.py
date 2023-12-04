@@ -191,7 +191,7 @@ def order_placed(request, total=0, quantity=0):
                 ordered_products.append(ordered_product)
 
         # Remove cart items after ordering
-        # cart_items.delete()
+        cart_items.delete()
         context = {
             'order': data,
             'cart_items': cart_items,
@@ -263,7 +263,7 @@ def order_placed(request, total=0, quantity=0):
                     print(wallet.balance,"baallllaaaaaaaaa")
                     print(data.total,"ttooootttl")
                     # Insufficient balance, handle this case (e.g., show a message to the user)
-                    messages.warning(request, 'Insufficient balance in the wallet.')
+                    messages.error(request, 'Insufficient balance in the wallet.')
                     return redirect("cart:checkout")
 
             except Wallet.DoesNotExist:
@@ -285,7 +285,6 @@ def order_placed(request, total=0, quantity=0):
 
             return render(request, "evara-frontend/order_placed.html", context)
                             
-
 
 
 def online_payment(request):
@@ -373,7 +372,7 @@ def my_orders(request):
 
 
 
-#-------------------------------------------ADMIN---------------------------------------------------#
+#-------------------------------------------ADMIN---------------------------------------------------------#
 
 
 def admn_product_order(request):
@@ -412,7 +411,6 @@ class AdmnCouponManagementView(View):
         valid_to = request.POST.get("couponexpiry")
 
 
-        # Check if a coupon with the same code already exists
         if Coupon.objects.filter(coupon_code=coupon_code).exists():
             messages.warning(request,"Coupon Code is Alredy Exist")
             coupons = Coupon.objects.all()
@@ -428,9 +426,8 @@ class AdmnCouponManagementView(View):
 
 
         coupons = Coupon.objects.all()
-        # Render the same template with the updated list of coupons
         return redirect("orders:admn_coupon_management")
-    
+
 
 
 def generate_code(request):
@@ -445,7 +442,7 @@ def delete_coupon(request,id):
     coupon.delete()
     return redirect("orders:admn_coupon_management") 
 
-
+    
 
 
 
@@ -490,7 +487,6 @@ def cancel_order(request, order_id):
             wallet = Wallet.objects.get(user=current_user)
             wallet_transactions = WalletTransaction.objects.filter(wallet=wallet)
 
-            # Calculate total wallet balance by iterating over transactions
             increment_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Credit")
             decement_val = sum(transaction.amount for transaction in wallet_transactions if transaction.transaction_type=="Debit")
             print(increment_val,decement_val)
@@ -498,14 +494,11 @@ def cancel_order(request, order_id):
             wallet.balance = total_wallet_balance
             wallet.save()
 
-            # Use the first WalletTransaction, you might want to adjust this logic based on your requirements
             wallet_transaction = wallet_transactions.first()
 
-            # Update wallet balance
             wallet.balance = total_wallet_balance
             wallet.save()
 
-            # Create a new wallet transaction
             WalletTransaction.objects.create(
                 wallet=wallet,
                 amount=order.total,
@@ -514,21 +507,16 @@ def cancel_order(request, order_id):
                 transaction_detail="Canceled Order"
             )
 
-            # Update order details
 
-            # Redirect to my_orders page
             return redirect("orders:my_orders")
 
         except Wallet.DoesNotExist:
-            # Handle the case where the user doesn't have a wallet
             messages.warning(request, 'Wallet does not exist. Creating a new one.')
             wallet = Wallet.objects.create(user=current_user, balance=0)
 
         except WalletTransaction.DoesNotExist:
-            # Handle the case where there is no existing WalletTransaction
             messages.warning(request, 'WalletTransaction does not exist. Creating a new one.')
 
-        # Create a new wallet transaction
         WalletTransaction.objects.create(
             wallet=wallet,
             amount=order.total,

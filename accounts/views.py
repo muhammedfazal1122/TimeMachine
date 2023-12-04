@@ -8,6 +8,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
 from .models import Account
+from user.models import Wallet,WalletTransaction
 import pyotp
 from product.models import Product
 import re
@@ -128,12 +129,11 @@ def register(request):
         email = request.POST['email']
         password = request.POST['password']
         confirmpassword = request.POST['password2']
+        referral_id = request.POST['referral_id']
 
         # Check for white spaces in username, password, and email
         if any(char.isspace() or re.match('[@#$%^@%@#%&]', char) for char in username):
             messages.error(request, "Username contains invalid characters")
-        # elif any(char.isspace() or re.match('[@#$%^@%@#%&]', char) for char in password):
-        #     messages.error(request, "e Must be Letter")
         elif any(char.isspace() or re.match('[#$%^%&]', char) for char in email):
             messages.error(request, "Invalid email format")
         elif User.objects.filter(email=email).exists():
@@ -143,9 +143,49 @@ def register(request):
         else:
             user = User.objects.create_user(username=username, email=email, password=password)
             user.save()
+
+            if referral_id:
+                try:
+                    referrer = Account.objects.get(referral_id=referral_id)
+
+                    try:
+                       
+                        referd_user = Wallet.objects.get(user=referrer)
+                        print("referd_userrrrrrrrrrrrrrrrrrrrrrrrr",referd_user)
+                      
+
+
+                        # Filter instead of get_or_create to handle multiple objects
+                        referd_user_transactions = WalletTransaction.objects.filter(wallet=referd_user)
+
+                        for transaction in referd_user_transactions:
+                            # Create a new transaction for each existing transaction
+                            new_transaction = WalletTransaction.objects.create(
+                                wallet=referd_user,
+                                amount=150,
+                                transaction_type="Credit",
+                                transaction_detail="Got a reward From Referrals"
+                            )
+                            new_transaction.save()
+
+                    except Wallet.DoesNotExist:
+                        messages.error(request, 'No Wallet exists for this user.')
+
+                    user_wallet, created = Wallet.objects.get_or_create(user=user, defaults={'balance': 0})
+                    my_transaction, created = WalletTransaction.objects.get_or_create(wallet=user_wallet, defaults={'amount': 0})
+
+                    my_transaction.amount += 100  
+                    my_transaction.transaction_type = "Credit"
+                    my_transaction.transaction_detail = "Got a reward From Referrals"
+                    my_transaction.save()
+                    
+
+                except Account.DoesNotExist:
+                    messages.error(request, 'Invalid referral code.')
+
             messages.success(request, "Registration successful")
             return redirect('accounts:user-login')
-    
+
     return render(request, "evara-frontend/accounts/register.html")
 
 

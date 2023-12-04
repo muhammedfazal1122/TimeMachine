@@ -83,10 +83,10 @@ Shop Page
                                                 <img class="hover-img"src="{{product.images.url}}"alt="">
                                             </a>
                                             <div class="product-action-1">
-                                                <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal">
+                                                {% comment %} <a aria-label="Quick view" class="action-btn  hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"> {% endcomment %}
                                                     <i class="fi-rs-search"></i></a>
                                                 <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                                <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                                {% comment %} <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a> {% endcomment %}
                                             </div>
                                         </div>
                                     </div>
@@ -106,12 +106,12 @@ Shop Page
                                     </div>
                                     <p class="mt-15">{{ product.description }}</p>
                                     <div class="product-action-1 show">
-                                        <a aria-label="Buy now" class="action-btn" href="{% url "cart:add_cart" product.id %}" ><i class="fi-rs-shopping-bag-add"></i>Add to Cart</a>
+                                        {% comment %} <a aria-label="Buy now" class="action-btn" href="{% url "cart:add_cart" product.id %}" ><i class="fi-rs-shopping-bag-add"></i>Add to Cart</a>
                                         <div class="rating-result" title="90%">
                                             <span>
                                                 <span>90%</span>
                                             </span>
-                                        </div>
+                                        </div> {% endcomment %}
                                     </div>
                                 </div>
                                 

@@ -59,8 +59,11 @@
                                         </div>
                                     </div>
                                 </div>
+                                
                             {% endfor %}
-
+                            <div>
+                                <span class="mx-3 " style="color: rgb(0, 14, 164);">Transaction ID : &nbsp{{ order.payment.payment_method }}</span>
+                            </div>
                             <!-- DIVIDER STARTS -->
                             <div class="row">
                                 <div class="col-12">
@@ -81,6 +84,8 @@
                                             <i class="material-icons md-close"></i>
                                             <span>Cancel Order</span>
                                         </button>
+                                        <a href="{% url "orders:ordered_product_detailes" order.id %}" class="btn btn-primary mr-2">Order Details</a>
+
                                     </form>
                                     {% else %}
 

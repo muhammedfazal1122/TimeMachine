@@ -17,7 +17,7 @@ from cart.models import Cart
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def index(request):
     products = Product.objects.all().filter(is_available=True)
-    brand = Brand.objects.all()
+    brand = Brand.objects.filter(soft_deleted=False)
     categories = Category.objects.all()
     users = Account.objects.all()
     cart = Cart.objects.all()

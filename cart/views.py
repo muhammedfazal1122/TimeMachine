@@ -65,6 +65,7 @@ def add_cart(request,product_id):
 
 def cart(request,total=0,quantity=0,cart_items=None):
     try:
+        category_discount_applyed=0
         cart = Cart.objects.get(cart_id=_cart_id(request))
         # cart_items =  CartItem.objects.filter(cart=cart,is_active=True)
         cart_items = CartItem.objects.filter(user=request.user, is_active=True)
@@ -75,8 +76,6 @@ def cart(request,total=0,quantity=0,cart_items=None):
             if category_discount != 0:
                 cart_item.product.price = getCatogoryPrice(cart_item)
                 category_discount_applyed = cart_item.product.price
-
-
 
             total += cart_item.product.price * cart_item.quantity
             quantity += cart_item.quantity
@@ -141,6 +140,7 @@ def checkout(request, total=0, quantity=0, cart_items=None):
         grand_total = 0
         total = 0
         quantity = 0
+        sub_total=0
 
         if current_user.is_authenticated:
             cart_items = CartItem.objects.filter(user=current_user, is_active=True)
